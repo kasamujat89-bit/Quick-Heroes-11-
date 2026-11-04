@@ -56,6 +56,7 @@ import com.example.ui.components.ActionMenuPopup
 import com.example.ui.components.CricHeroesBottomBar
 import com.example.ui.components.CricHeroesTopBar
 import com.example.ui.components.ProfileDrawerContent
+import com.example.ui.components.PlayerDetailDialog
 import com.example.ui.screens.FindCricketersScreen
 import com.example.ui.screens.FullScorecardScreen
 import com.example.ui.screens.HomeScreen
@@ -83,8 +84,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
-                CricHeroesApp()
+            val viewModel: CricketViewModel = viewModel()
+            val isDarkMode by viewModel.isDarkMode.collectAsState()
+            MyApplicationTheme(darkTheme = isDarkMode) {
+                CricHeroesApp(viewModel = viewModel)
             }
         }
     }
@@ -102,6 +105,8 @@ fun CricHeroesApp(
     val isPlusMenuOpen by viewModel.isPlusMenuOpen.collectAsState()
     val isHelpModalOpen by viewModel.isHelpModalOpen.collectAsState()
     val userProfile by viewModel.userProfile.collectAsState()
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
+    val selectedViewingPlayer by viewModel.selectedViewingPlayer.collectAsState()
 
     // When on Splash Screen, show logo splash screen without scaffolding
     if (currentScreen is AppScreen.Splash) {
@@ -139,8 +144,8 @@ fun CricHeroesApp(
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars),
             topBar = {
-                // Show CricHeroes TopBar on main screens (No PRO or 199 plan)
-                if (currentScreen is AppScreen.Home || currentScreen is AppScreen.Looking || currentScreen is AppScreen.MyCricket || currentScreen is AppScreen.Store) {
+                // Show CricHeroes TopBar on main screens (Home, Looking, MyCricket)
+                if (currentScreen is AppScreen.Home || currentScreen is AppScreen.Looking || currentScreen is AppScreen.MyCricket) {
                     CricHeroesTopBar(
                         onAvatarClick = {
                             coroutineScope.launch { drawerState.open() }
@@ -148,17 +153,19 @@ fun CricHeroesApp(
                         onPlusClick = {
                             viewModel.isPlusMenuOpen.value = !viewModel.isPlusMenuOpen.value
                         },
-                        userProfile = userProfile
+                        userProfile = userProfile,
+                        isDarkMode = isDarkMode,
+                        onToggleDarkMode = { viewModel.toggleDarkMode() },
+                        onRefresh = { viewModel.refreshData() }
                     )
                 }
             },
             bottomBar = {
-                // Show Bottom Nav on main tabs
+                // Show Bottom Nav on main tabs (No Store)
                 val isMainTab = currentScreen is AppScreen.Home ||
                         currentScreen is AppScreen.Looking ||
                         currentScreen is AppScreen.MyCricket ||
-                        currentScreen is AppScreen.Community ||
-                        currentScreen is AppScreen.Store
+                        currentScreen is AppScreen.Community
 
                 if (isMainTab) {
                     CricHeroesBottomBar(
@@ -256,6 +263,14 @@ fun CricHeroesApp(
     // Cricket Help & Scoring Guide Dialog (100% Free - No Plan or Fees)
     if (isHelpModalOpen) {
         CricketHelpDialog(onDismiss = { viewModel.isHelpModalOpen.value = false })
+    }
+
+    // Player Details Dialog (Requirement 8 - View any player's full profile & record)
+    selectedViewingPlayer?.let { player ->
+        PlayerDetailDialog(
+            player = player,
+            onDismiss = { viewModel.closePlayerView() }
+        )
     }
 }
 

@@ -77,6 +77,8 @@ import com.example.ui.theme.CricTextPrimary
 import com.example.ui.theme.CricTextSecondary
 import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CricketViewModel
+import com.example.ui.components.CelebrationOverlay
+import androidx.compose.material.icons.filled.Refresh
 
 @Composable
 fun LiveScoringScreen(
@@ -86,6 +88,8 @@ fun LiveScoringScreen(
 ) {
     val isSpectatorMode by viewModel.isSpectatorMode.collectAsState()
     val match by viewModel.currentMatch.collectAsState()
+    val celebrationEvent by viewModel.celebrationEvent.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isOverCompleteModalOpen by viewModel.isOverCompleteModalOpen.collectAsState()
     val isWicketModalOpen by viewModel.isWicketModalOpen.collectAsState()
     val isBowlerModalOpen by viewModel.isBowlerModalOpen.collectAsState()
@@ -145,79 +149,97 @@ fun LiveScoringScreen(
     var showExtrasDialog by remember { mutableStateOf(false) }
     var selectedExtraType by remember { mutableStateOf<ExtraType?>(null) }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .testTag("live_scoring_screen")
+            .testTag("live_scoring_screen_container")
     ) {
-        // Top App Bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 2.dp
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .testTag("live_scoring_screen")
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Top App Bar
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 2.dp
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack, modifier = Modifier.testTag("scoring_back_button")) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                    Column {
-                        Text(
-                            text = "${activeMatch.teamA.shortName} vs ${activeMatch.teamB.shortName}",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                        Text(
-                            text = if (activeMatch.currentInningIndex == 0) "1st Innings" else "2nd Innings",
-                            fontSize = 12.sp,
-                            color = CricTeal,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (isSpectatorMode) {
-                        Surface(
-                            color = Color(0xFFDC2626),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onBack, modifier = Modifier.testTag("scoring_back_button")) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                        Column {
                             Text(
-                                text = "🔴 LIVE દર્શક",
-                                color = Color.White,
+                                text = "${activeMatch.teamA.shortName} vs ${activeMatch.teamB.shortName}",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = if (activeMatch.currentInningIndex == 0) "1st Innings" else "2nd Innings",
+                                fontSize = 12.sp,
+                                color = CricTeal,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
-                    } else {
-                        // Undo last ball button (Only enabled in scorer mode)
-                        IconButton(
-                            onClick = { viewModel.undoLastBall() },
-                            modifier = Modifier.testTag("undo_button")
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo", tint = CricSecondary)
-                        }
                     }
 
-                    // Scorecard button
-                    OutlinedButton(
-                        onClick = { viewModel.navigateTo(AppScreen.FullScorecard) },
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.height(34.dp).testTag("full_scorecard_nav_button")
-                    ) {
-                        Text("Scorecard", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        // Refresh button (Requirement 11)
+                        IconButton(
+                            onClick = { viewModel.refreshData() },
+                            modifier = Modifier.size(34.dp).testTag("live_refresh_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Refresh Scores",
+                                tint = CricTeal,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        if (isSpectatorMode) {
+                            Surface(
+                                color = Color(0xFFDC2626),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = "🔴 LIVE દર્શક",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        } else {
+                            // Undo last ball button (Only enabled in scorer mode)
+                            IconButton(
+                                onClick = { viewModel.undoLastBall() },
+                                modifier = Modifier.testTag("undo_button")
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo", tint = CricSecondary)
+                            }
+                        }
+
+                        // Scorecard button
+                        OutlinedButton(
+                            onClick = { viewModel.navigateTo(AppScreen.FullScorecard) },
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.height(34.dp).testTag("full_scorecard_nav_button")
+                        ) {
+                            Text("Scorecard", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
-        }
 
         // Mode Switcher Banner: Easily toggle between Live Spectator Mode and Match Scorer Mode
         Surface(
@@ -756,6 +778,13 @@ fun LiveScoringScreen(
             }
         )
     }
+
+    // Firecrackers Celebration Overlay on 4, 6, Wicket (Requirement 10)
+    CelebrationOverlay(
+        celebration = celebrationEvent,
+        onDismiss = { viewModel.clearCelebration() }
+    )
+    }
 }
 
 @Composable
@@ -944,12 +973,66 @@ fun WicketDismissalDialog(
 
                 if (selectedType == DismissalType.CAUGHT || selectedType == DismissalType.RUN_OUT || selectedType == DismissalType.STUMPED) {
                     Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = if (selectedType == DismissalType.CAUGHT) "કેચ કોણે પકડ્યો? (Caught by):" else "ફિલ્ડર પસંદ કરો (Fielder):",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = CricTeal
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Fielders list chips from bowling team (Requirement 4)
+                    val fieldingPlayers = bowlingTeam.players.ifEmpty {
+                        listOf(
+                            Player("f1", "Wicketkeeper", "Naliya", role = "Wk-Batsman"),
+                            Player("f2", "Slip Fielder", "Naliya", role = "Batsman"),
+                            Player("f3", "Point Fielder", "Naliya", role = "All-rounder"),
+                            Player("f4", "Cover Fielder", "Naliya", role = "Bowler")
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        fieldingPlayers.forEach { fielder ->
+                            val isFielderSelected = fielderName == fielder.name
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { fielderName = fielder.name },
+                                color = if (isFielderSelected) CricTeal else Color(0xFFF1F5F9),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (isFielderSelected) {
+                                        Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                    }
+                                    Text(
+                                        text = fielder.name,
+                                        fontSize = 12.sp,
+                                        fontWeight = if (isFielderSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isFielderSelected) Color.White else CricTextPrimary
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = fielderName,
                         onValueChange = { fielderName = it },
-                        label = { Text("Fielder Name") },
+                        label = { Text("અથવા ફિલ્ડરનું નામ લખો (Custom Fielder)") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(10.dp)
                     )
                 }
 

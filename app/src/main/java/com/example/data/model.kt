@@ -28,6 +28,7 @@ data class Player(
     val id: String,
     val name: String,
     val city: String,
+    val phone: String = "",
     val matches: Int = 0,
     val runs: Int = 0,
     val wickets: Int = 0,
@@ -145,11 +146,31 @@ data class Inning(
     val activeBowler: BowlerScore?
         get() = bowlerScores.find { it.player.id == currentBowlerId }
 
+    val currentOverNumber: Int
+        get() = legalBalls / 6
+
+    val currentOverBalls: List<BallEvent>
+        get() {
+            if (ballHistory.isEmpty()) return emptyList()
+            return ballHistory.filter { it.overNumber == (legalBalls / 6) }
+        }
+
     val recentBalls: List<BallEvent>
         get() {
-            // Get last 6-8 balls for the ball timeline strip
-            return ballHistory.takeLast(8)
+            if (ballHistory.isEmpty()) return emptyList()
+            val targetOver = if (legalBalls > 0 && legalBalls % 6 == 0 && ballHistory.lastOrNull()?.isLegalBall == true) {
+                (legalBalls - 1) / 6
+            } else {
+                legalBalls / 6
+            }
+            return ballHistory.filter { it.overNumber == targetOver }
         }
+}
+
+enum class CelebrationType(val title: String, val subtitle: String, val colorHex: Long) {
+    FOUR("FOUR! ૪ રન!", "શાનદાર ચોગ્ગો! બોલ બાઉન્ડ્રી પાર!", 0xFF2563EB),
+    SIX("SIX! ૬ રન!", "ગગનચુંબી છગ્ગો! બોલ સીધો સ્ટેન્ડમાં!", 0xFF16A34A),
+    WICKET("WICKET! વિકેટ!", "ખેલાડી આઉટ! બોલરને મોટી સફળતા!", 0xFFDC2626)
 }
 
 data class CricketMatch(
@@ -167,7 +188,8 @@ data class CricketMatch(
     val status: MatchStatus = MatchStatus.LIVE,
     val currentInningIndex: Int = 0, // 0 for 1st inning, 1 for 2nd inning
     val innings: List<Inning> = emptyList(),
-    val resultMessage: String? = null
+    val resultMessage: String? = null,
+    val scorerId: String = "user_kasam_jat"
 ) {
     val currentInning: Inning?
         get() = innings.getOrNull(currentInningIndex)

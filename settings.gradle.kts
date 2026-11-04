@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "CricHeroes"
+rootProject.name = "Quick Heroes 11"
 
 include(":app")

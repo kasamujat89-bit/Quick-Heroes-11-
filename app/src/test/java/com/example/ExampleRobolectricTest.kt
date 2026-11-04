@@ -1,9 +1,11 @@
 package com.example
 
+import com.example.data.SampleData
 import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CricketViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -32,17 +34,42 @@ class ExampleRobolectricTest {
     @Test
     fun testSpectatorVsScorerMode() {
         val viewModel = CricketViewModel()
+        // Starts with clean null match (no dummy matches)
+        assertNull(viewModel.currentMatch.value)
+
+        viewModel.createAndStartMatch(
+            teamA = SampleData.teamNaliya,
+            teamB = SampleData.teamKutch,
+            totalOvers = 10,
+            matchType = "Limited Overs",
+            ballType = "Tennis Ball",
+            venue = "Naliya Cricket Ground",
+            tossWinner = SampleData.teamNaliya,
+            tossDecision = "Bat",
+            striker = SampleData.players[0],
+            nonStriker = SampleData.players[1],
+            openingBowler = SampleData.players[6]
+        )
         val match = viewModel.currentMatch.value
         assertNotNull(match)
 
-        // Open match as spectator (Read-only, no scoring keypad)
-        viewModel.openMatchAsSpectator(match!!)
-        assertEquals(AppScreen.LiveScoring, viewModel.currentScreen)
-        assertTrue(viewModel.isSpectatorMode.value)
-
-        // Switch role to scorer mode
-        viewModel.setSpectatorMode(false)
+        // Scorer mode by default for match creator
         assertEquals(false, viewModel.isSpectatorMode.value)
+
+        // Switch to spectator mode (Keypad disabled, view-only)
+        viewModel.setSpectatorMode(true)
+        assertTrue(viewModel.isSpectatorMode.value)
+    }
+
+    @Test
+    fun testDarkModeDefaultAndToggle() {
+        val viewModel = CricketViewModel()
+        // Default is Light Mode (false) as requested
+        assertEquals(false, viewModel.isDarkMode.value)
+        viewModel.toggleDarkMode()
+        assertEquals(true, viewModel.isDarkMode.value)
+        viewModel.toggleDarkMode()
+        assertEquals(false, viewModel.isDarkMode.value)
     }
 
     @Test

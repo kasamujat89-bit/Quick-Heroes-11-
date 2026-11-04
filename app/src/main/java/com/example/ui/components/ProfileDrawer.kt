@@ -30,13 +30,15 @@ import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.SportsCricket
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.Image
@@ -72,6 +74,7 @@ fun ProfileDrawerContent(
     modifier: Modifier = Modifier
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     Column(
         modifier = modifier
@@ -226,15 +229,6 @@ fun ProfileDrawerContent(
         HorizontalDivider(color = Color(0xFFF1F5F9))
 
         DrawerMenuItem(
-            icon = Icons.Default.ShoppingBag,
-            title = "CricHeroes Store",
-            onClick = {
-                onCloseDrawer()
-                viewModel.navigateTo(AppScreen.Store)
-            }
-        )
-
-        DrawerMenuItem(
             icon = Icons.Default.Leaderboard,
             title = "Leaderboards",
             onClick = {
@@ -245,7 +239,7 @@ fun ProfileDrawerContent(
 
         DrawerMenuItem(
             icon = Icons.Default.EmojiEvents,
-            title = "CricHeroes Awards",
+            title = "Quick Heroes Awards",
             onClick = {
                 onCloseDrawer()
             }
@@ -269,13 +263,44 @@ fun ProfileDrawerContent(
             }
         )
 
-        DrawerMenuItem(
-            icon = Icons.Default.Palette,
-            title = "Appearance",
-            onClick = {
-                onCloseDrawer()
+        HorizontalDivider(color = Color(0xFFF1F5F9))
+
+        // Dark Mode / Light Mode Switch (Requirements 8 & 12)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { viewModel.toggleDarkMode() }
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                    contentDescription = null,
+                    tint = if (isDarkMode) Color(0xFFFBBF24) else CricTeal,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = if (isDarkMode) "ડાર્ક મોડ (Dark Mode)" else "લાઇટ મોડ (Light Mode)",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = if (isDarkMode) "ડાર્ક થીમ સક્રિય છે" else "ડિફોલ્ટ લાઇટ થીમ",
+                        fontSize = 11.sp,
+                        color = CricTextSecondary
+                    )
+                }
             }
-        )
+            Switch(
+                checked = isDarkMode,
+                onCheckedChange = { viewModel.toggleDarkMode() }
+            )
+        }
     }
 }
 

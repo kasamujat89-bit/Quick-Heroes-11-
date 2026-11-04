@@ -15,8 +15,8 @@ class ExampleUnitTest {
   @Test
   fun cricketScoring_andUndo_worksCorrectly() {
     val viewModel = CricketViewModel()
-    // Verify initially live community match is available to spectate
-    org.junit.Assert.assertNotNull(viewModel.currentMatch.value)
+    // Verify initially no dummy matches exist in the database (clean start)
+    assertNull(viewModel.currentMatch.value)
 
     // User starts a new match with teams and players
     viewModel.createAndStartMatch(
@@ -37,10 +37,11 @@ class ExampleUnitTest {
     val initialScore = viewModel.currentMatch.value?.currentInning?.totalRuns ?: 0
     assertEquals(0, initialScore)
 
-    // Record runs: 4
+    // Record runs: 4 (triggers celebration)
     viewModel.recordRuns(4)
     val afterFour = viewModel.currentMatch.value?.currentInning?.totalRuns ?: 0
     assertEquals(4, afterFour)
+    assertEquals(com.example.data.CelebrationType.FOUR, viewModel.celebrationEvent.value)
 
     // Undo last ball
     viewModel.undoLastBall()

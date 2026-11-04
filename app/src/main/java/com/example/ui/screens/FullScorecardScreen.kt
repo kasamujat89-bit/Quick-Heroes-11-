@@ -47,6 +47,11 @@ import com.example.ui.theme.CricSecondary
 import com.example.ui.theme.CricTeal
 import com.example.ui.theme.CricTextPrimary
 import com.example.ui.theme.CricTextSecondary
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.filled.SportsCricket
+import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CricketViewModel
 
 @Composable
@@ -56,7 +61,53 @@ fun FullScorecardScreen(
     modifier: Modifier = Modifier
 ) {
     val currentMatchState by viewModel.currentMatch.collectAsState()
-    val match = currentMatchState ?: SampleData.completedMatches.first()
+    val allMatches by viewModel.matchesList.collectAsState()
+    val match = currentMatchState ?: allMatches.firstOrNull()
+
+    if (match == null) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                Icons.Default.SportsCricket,
+                contentDescription = null,
+                tint = CricTeal,
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "કોઈ સ્કોરકાર્ડ ઉપલબ્ધ નથી",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "સ્કોરકાર્ડ જોવા માટે પહેલા નવી મેચ શરૂ કરો.",
+                fontSize = 13.sp,
+                color = CricTextSecondary
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = { viewModel.navigateTo(AppScreen.MatchSetup) },
+                colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Start Match (મેચ શરૂ કરો)", fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedButton(onClick = onBack) {
+                Text("Back")
+            }
+        }
+        return
+    }
+
     var selectedInningTab by remember { mutableIntStateOf(0) }
 
     val innings = match.innings

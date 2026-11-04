@@ -274,71 +274,6 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Design of the Month Banner (Matching Screenshot 1)
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .shadow(4.dp, RoundedCornerShape(14.dp)),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(Color(0xFF831843), Color(0xFFBE185D), Color(0xFFF43F5E))
-                        )
-                    )
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Design of the month",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Custom team jerseys & tournament kit collection",
-                            color = Color.White.copy(alpha = 0.85f),
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Button(
-                            onClick = { viewModel.navigateTo(AppScreen.Store) },
-                            colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text("Explore now", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                    // Cricket Jersey visual badge
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.WorkspacePremium,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
-                }
-            }
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // Recent Matches Section
@@ -350,33 +285,72 @@ fun HomeScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Recent Matches",
+                text = "Recent Matches (તાજેતરની મેચો)",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = "See all",
-                color = CricTeal,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { viewModel.navigateTo(AppScreen.FullScorecard) }
-            )
+            if (allMatches.isNotEmpty()) {
+                Text(
+                    text = "See all",
+                    color = CricTeal,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable { viewModel.navigateTo(AppScreen.FullScorecard) }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        allMatches.forEach { match ->
-            MatchSummaryRow(
-                match = match,
-                onClick = {
-                    if (match.status == MatchStatus.LIVE) {
-                        viewModel.openMatchAsSpectator(match)
-                    } else {
-                        viewModel.navigateTo(AppScreen.FullScorecard)
-                    }
+        if (allMatches.isEmpty()) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.SportsCricket,
+                        contentDescription = null,
+                        tint = CricTeal,
+                        modifier = Modifier.size(36.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "કોઈ મેચ રમાયેલી નથી",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "નવી મેચ શરૂ કરવા 'Start Match' બટન દબાવો.",
+                        fontSize = 12.sp,
+                        color = CricTextSecondary
+                    )
                 }
-            )
+            }
+        } else {
+            allMatches.forEach { match ->
+                MatchSummaryRow(
+                    match = match,
+                    onClick = {
+                        if (match.status == MatchStatus.LIVE) {
+                            viewModel.openMatchAsSpectator(match)
+                        } else {
+                            viewModel.navigateTo(AppScreen.FullScorecard)
+                        }
+                    }
+                )
+            }
         }
     }
 }

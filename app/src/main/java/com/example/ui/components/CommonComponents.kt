@@ -22,11 +22,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SportsCricket
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.Home
@@ -70,6 +73,10 @@ import com.example.viewmodel.AppScreen
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import com.example.data.UserProfile
+import com.example.data.Player
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.fillMaxSize
 import com.example.ui.theme.CricGold
 
@@ -178,6 +185,9 @@ fun CricHeroesTopBar(
     onPlusClick: () -> Unit,
     modifier: Modifier = Modifier,
     userProfile: UserProfile? = null,
+    isDarkMode: Boolean = false,
+    onToggleDarkMode: (() -> Unit)? = null,
+    onRefresh: (() -> Unit)? = null,
     onProClick: (() -> Unit)? = null
 ) {
     Surface(
@@ -188,7 +198,7 @@ fun CricHeroesTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -204,7 +214,7 @@ fun CricHeroesTopBar(
                 UserProfileAvatar(
                     photoUri = userProfile?.photoUri,
                     avatarPreset = userProfile?.avatarPreset ?: 0,
-                    sizeDp = 42
+                    sizeDp = 40
                 )
 
                 Column {
@@ -232,39 +242,57 @@ fun CricHeroesTopBar(
                 }
             }
 
-            // Right: Chat, Bell, and CricHeroes Green/Teal '+' Button
+            // Right: Refresh, Dark/Light Mode, Chat, Bell, and '+' Button
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                IconButton(
-                    onClick = { /* Chat dialog */ },
-                    modifier = Modifier.size(38.dp).testTag("chat_icon_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Chat,
-                        contentDescription = "Chats",
-                        tint = CricTextSecondary,
-                        modifier = Modifier.size(22.dp)
-                    )
+                // Instant Refresh Button
+                if (onRefresh != null) {
+                    IconButton(
+                        onClick = { onRefresh() },
+                        modifier = Modifier.size(36.dp).testTag("topbar_refresh_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh Scores",
+                            tint = CricTeal,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                // Dark / Light Mode Toggle
+                if (onToggleDarkMode != null) {
+                    IconButton(
+                        onClick = { onToggleDarkMode() },
+                        modifier = Modifier.size(36.dp).testTag("theme_toggle_button")
+                    ) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode",
+                            tint = if (isDarkMode) Color(0xFFFBBF24) else CricTextSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 IconButton(
                     onClick = { /* Notifications */ },
-                    modifier = Modifier.size(38.dp).testTag("notifications_icon_button")
+                    modifier = Modifier.size(36.dp).testTag("notifications_icon_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notifications",
                         tint = CricTextSecondary,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
                 // Green/Teal '+' Button (Screenshot 1)
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(CricTeal)
                         .clickable { onPlusClick() }
@@ -275,7 +303,7 @@ fun CricHeroesTopBar(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Start match or action",
                         tint = Color.White,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -484,25 +512,165 @@ fun CricHeroesBottomBar(
             ),
             modifier = Modifier.testTag("nav_item_community")
         )
+    }
+}
 
-        NavigationBarItem(
-            selected = currentScreen is AppScreen.Store,
-            onClick = { onNavigate(AppScreen.Store) },
-            icon = {
-                Icon(
-                    imageVector = if (currentScreen is AppScreen.Store) Icons.Filled.ShoppingBag else Icons.Outlined.ShoppingBag,
-                    contentDescription = "Store"
-                )
-            },
-            label = { Text("Store", fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CricSecondary,
-                selectedTextColor = CricSecondary,
-                indicatorColor = Color(0xFFFFE4E6),
-                unselectedIconColor = CricTextSecondary,
-                unselectedTextColor = CricTextSecondary
-            ),
-            modifier = Modifier.testTag("nav_item_store")
+/**
+ * Dialog displaying full cricket record and details of any player.
+ * Shows Name, Role, Phone number (📞), City, Matches, Runs, Wickets, Batting style, Bowling style.
+ */
+@Composable
+fun PlayerDetailDialog(
+    player: Player,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                UserProfileAvatar(sizeDp = 44)
+                Column {
+                    Text(
+                        text = player.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = player.role,
+                        color = CricTeal,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Phone Number Pill (If available)
+                if (player.phone.isNotBlank()) {
+                    Surface(
+                        color = CricTeal.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Phone,
+                                contentDescription = "Phone",
+                                tint = CricTeal,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "મોબાઈલ: ${player.phone}",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = CricTeal
+                            )
+                        }
+                    }
+                }
+
+                // Career Stats Grid (Matches, Runs, Wickets)
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = player.matches.toString(),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "મેચ (Matches)",
+                                fontSize = 11.sp,
+                                color = CricTextSecondary
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = player.runs.toString(),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 18.sp,
+                                color = CricSecondary
+                            )
+                            Text(
+                                text = "રન (Runs)",
+                                fontSize = 11.sp,
+                                color = CricTextSecondary
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = player.wickets.toString(),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 18.sp,
+                                color = CricTeal
+                            )
+                            Text(
+                                text = "વિકેટ (Wickets)",
+                                fontSize = 11.sp,
+                                color = CricTextSecondary
+                            )
+                        }
+                    }
+                }
+
+                // Detailed Specs: City, Batting & Bowling Style, Jersey
+                HorizontalDivider(color = Color(0xFFF1F5F9))
+
+                PlayerSpecRow(label = "શહેર (City)", value = player.city.ifBlank { "Naliya, Kutch" })
+                PlayerSpecRow(label = "બેટિંગ સ્ટાઇલ (Batting)", value = player.battingStyle)
+                PlayerSpecRow(label = "બોલિંગ સ્ટાઇલ (Bowling)", value = player.bowlingStyle)
+                PlayerSpecRow(label = "જર્સી નંબર (Jersey #)", value = "#${player.jerseyNumber}")
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("બંધ કરો (Close)", fontWeight = FontWeight.Bold)
+            }
+        }
+    )
+}
+
+@Composable
+private fun PlayerSpecRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = label, fontSize = 12.sp, color = CricTextSecondary)
+        Text(
+            text = value,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

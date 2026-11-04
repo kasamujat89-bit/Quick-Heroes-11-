@@ -17,7 +17,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-
+import androidx.lifecycle.viewModelScope
+import com.example.data.CelebrationType
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.example.data.UserProfile
 
 sealed class AppScreen {
@@ -42,6 +45,48 @@ class CricketViewModel : ViewModel() {
     private val _userProfile = MutableStateFlow(UserProfile())
     val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
 
+    // Light / Dark Mode Toggle (Default is FALSE: Light Mode as requested by user)
+    val isDarkMode = MutableStateFlow(false)
+    fun toggleDarkMode() {
+        isDarkMode.value = !isDarkMode.value
+    }
+
+    // Celebration Animation Event (Triggered on 4 runs, 6 runs, or wicket)
+    private val _celebrationEvent = MutableStateFlow<CelebrationType?>(null)
+    val celebrationEvent: StateFlow<CelebrationType?> = _celebrationEvent.asStateFlow()
+
+    fun triggerCelebration(type: CelebrationType) {
+        _celebrationEvent.value = type
+    }
+
+    fun clearCelebration() {
+        _celebrationEvent.value = null
+    }
+
+    // Selected Player for full profile & record viewing dialog
+    private val _selectedViewingPlayer = MutableStateFlow<Player?>(null)
+    val selectedViewingPlayer: StateFlow<Player?> = _selectedViewingPlayer.asStateFlow()
+
+    fun viewPlayer(player: Player) {
+        _selectedViewingPlayer.value = player
+    }
+
+    fun closePlayerView() {
+        _selectedViewingPlayer.value = null
+    }
+
+    // Instant Live Data Refresh
+    val isRefreshing = MutableStateFlow(false)
+    fun refreshData() {
+        viewModelScope.launch {
+            isRefreshing.value = true
+            delay(400)
+            _currentMatch.update { it?.copy() }
+            _matchesList.update { it.toList() }
+            isRefreshing.value = false
+        }
+    }
+
     // Spectator vs Scorer Mode
     // When true: Read-only live spectator mode (no score editing keypad, live updates from scorer)
     // When false: Scorer mode (full keypad, out dialog, bowler changes, extras)
@@ -55,18 +100,24 @@ class CricketViewModel : ViewModel() {
     val currentScreen: AppScreen
         get() = _screenStack.value.lastOrNull() ?: AppScreen.Home
 
-    // Active Live Match (Initialized with sample live community match so users can spectate or score immediately)
-    private val _currentMatch = MutableStateFlow<CricketMatch?>(SampleData.createInitialLiveMatch())
+    // Active Live Match (Clean state - starts null, no dummy matches!)
+    private val _currentMatch = MutableStateFlow<CricketMatch?>(null)
     val currentMatch: StateFlow<CricketMatch?> = _currentMatch.asStateFlow()
 
-    // Matches List
-    private val _matchesList = MutableStateFlow<List<CricketMatch>>(
-        listOf(SampleData.createInitialLiveMatch()) + SampleData.completedMatches
-    )
+    // Matches List (Clean initial list without dummy matches)
+    private val _matchesList = MutableStateFlow<List<CricketMatch>>(emptyList())
     val matchesList: StateFlow<List<CricketMatch>> = _matchesList.asStateFlow()
 
-    // Players list
-    private val _players = MutableStateFlow<List<Player>>(SampleData.players)
+    // Clean players list with mobile numbers
+    private val _players = MutableStateFlow<List<Player>>(
+        listOf(
+            Player("p_u1", "Kasam Jat", "Naliya", phone = "8980294520", matches = 34, runs = 1240, wickets = 48, role = "All-rounder"),
+            Player("p_u2", "Abuahemad Jat", "Naliya", phone = "9825101122", matches = 976, runs = 19336, wickets = 914, role = "Batsman"),
+            Player("p_u3", "Hasan.a.Jat", "Naliya", phone = "9723412345", matches = 829, runs = 13276, wickets = 599, role = "All-rounder"),
+            Player("p_u4", "Latif Jat (L-J)", "Naliya", phone = "9879054321", matches = 794, runs = 8825, wickets = 616, role = "Bowler"),
+            Player("p_u5", "M s jat", "Naliya", phone = "9909988776", matches = 758, runs = 7108, wickets = 480, role = "Wk-Batsman")
+        )
+    )
     val players: StateFlow<List<Player>> = _players.asStateFlow()
 
     // UI Dialog & Sheet states
@@ -173,6 +224,12 @@ class CricketViewModel : ViewModel() {
 
         val strikerScore = inning.striker ?: return
         val bowlerScore = inning.activeBowler ?: return
+
+        if (runs == 4) {
+            triggerCelebration(CelebrationType.FOUR)
+        } else if (runs == 6) {
+            triggerCelebration(CelebrationType.SIX)
+        }
 
         val newStrikerScore = strikerScore.copy(
             runs = strikerScore.runs + runs,
@@ -370,6 +427,8 @@ class CricketViewModel : ViewModel() {
 
         val strikerScore = inning.striker ?: return
         val bowlerScore = inning.activeBowler ?: return
+
+        triggerCelebration(CelebrationType.WICKET)
 
         val isBowlerWicket = (dismissalType != DismissalType.RUN_OUT && dismissalType != DismissalType.RETIRED_HURT)
 
@@ -664,7 +723,8 @@ class CricketViewModel : ViewModel() {
             status = MatchStatus.LIVE,
             currentInningIndex = 0,
             innings = listOf(firstInning),
-            resultMessage = null
+            resultMessage = null,
+            scorerId = _userProfile.value.id
         )
 
         _currentMatch.value = newMatch

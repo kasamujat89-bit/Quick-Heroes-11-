@@ -45,8 +45,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -113,11 +114,11 @@ fun MatchSetupScreen(
     var teamAPlayers by remember {
         mutableStateOf(
             listOf(
-                Player("p_a1", "Abuahemad Jat", "Naliya", role = "Batsman"),
-                Player("p_a2", "Hasan.a.Jat", "Naliya", role = "All-rounder"),
-                Player("p_a3", "Latif Jat (L-J)", "Naliya", role = "Bowler"),
-                Player("p_a4", "M s jat", "Naliya", role = "Wk-Batsman"),
-                Player("p_a5", "Karam Khan", "Naliya", role = "All-rounder")
+                Player("p_a1", "Abuahemad Jat", "Naliya", phone = "9825101122", role = "Batsman"),
+                Player("p_a2", "Hasan.a.Jat", "Naliya", phone = "9723412345", role = "All-rounder"),
+                Player("p_a3", "Latif Jat (L-J)", "Naliya", phone = "9879054321", role = "Bowler"),
+                Player("p_a4", "M s jat", "Naliya", phone = "9909988776", role = "Wk-Batsman"),
+                Player("p_a5", "Kasam Jat", "Naliya", phone = "8980294520", role = "All-rounder")
             )
         )
     }
@@ -125,17 +126,18 @@ fun MatchSetupScreen(
     var teamBPlayers by remember {
         mutableStateOf(
             listOf(
-                Player("p_b1", "Imran Pathan", "Bhuj", role = "All-rounder"),
-                Player("p_b2", "Hardik Solanki", "Rajkot", role = "Bowler"),
-                Player("p_b3", "Suresh Jadeja", "Gandhidham", role = "Batsman"),
-                Player("p_b4", "Hussain A", "Naliya", role = "Batsman"),
-                Player("p_b5", "Tariq Baloch", "Bhuj", role = "Bowler")
+                Player("p_b1", "Imran Pathan", "Bhuj", phone = "9825012345", role = "All-rounder"),
+                Player("p_b2", "Hardik Solanki", "Rajkot", phone = "9898123456", role = "Bowler"),
+                Player("p_b3", "Suresh Jadeja", "Gandhidham", phone = "9725512345", role = "Batsman"),
+                Player("p_b4", "Hussain A", "Naliya", phone = "9426012345", role = "Batsman"),
+                Player("p_b5", "Tariq Baloch", "Bhuj", phone = "9879912345", role = "Bowler")
             )
         )
     }
 
     var activeSquadTab by remember { mutableIntStateOf(0) } // 0 for Team A, 1 for Team B
     var newPlayerNameInput by remember { mutableStateOf("") }
+    var newPlayerMobileInput by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("All-rounder") }
     var inputErrorText by remember { mutableStateOf<String?>(null) }
     var successAddMessage by remember { mutableStateOf<String?>(null) }
@@ -143,13 +145,14 @@ fun MatchSetupScreen(
 
     // Dialog state for full custom player
     var dialogPlayerName by remember { mutableStateOf("") }
+    var dialogPlayerPhone by remember { mutableStateOf("") }
     var dialogPlayerRole by remember { mutableStateOf("All-rounder") }
     var dialogPlayerCity by remember { mutableStateOf("") }
 
     val activeList = if (activeSquadTab == 0) teamAPlayers else teamBPlayers
     val activeTeamName = if (activeSquadTab == 0) teamAName.ifBlank { "Team 1" } else teamBName.ifBlank { "Team 2" }
 
-    fun addPlayer(name: String, role: String, city: String = venue) {
+    fun addPlayer(name: String, role: String, city: String = venue, phone: String = newPlayerMobileInput) {
         val trimmed = name.trim()
         if (trimmed.isBlank()) {
             inputErrorText = "કૃપા કરીને ખેલાડીનું નામ લખો (Please enter player name)"
@@ -159,6 +162,7 @@ fun MatchSetupScreen(
             id = "p_${System.currentTimeMillis()}_${(100..999).random()}",
             name = trimmed,
             city = city.ifBlank { venue.ifBlank { "Kutch" } },
+            phone = phone.trim(),
             role = role
         )
         if (activeSquadTab == 0) {
@@ -167,6 +171,7 @@ fun MatchSetupScreen(
             teamBPlayers = teamBPlayers + newPlayer
         }
         newPlayerNameInput = ""
+        newPlayerMobileInput = ""
         inputErrorText = null
         successAddMessage = "✓ $trimmed ને $activeTeamName માં ઉમેર્યા!"
     }
@@ -563,6 +568,39 @@ fun MatchSetupScreen(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
+                            // Mobile Number Input Field (Requirement 2)
+                            OutlinedTextField(
+                                value = newPlayerMobileInput,
+                                onValueChange = { newPlayerMobileInput = it },
+                                label = { Text("Mobile Number (મોબાઈલ નંબર)") },
+                                placeholder = {
+                                    Text("દા.ત. 98250 12345", fontSize = 13.sp, color = CricTextSecondary)
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Phone, contentDescription = null, tint = CricTeal)
+                                },
+                                trailingIcon = {
+                                    if (newPlayerMobileInput.isNotEmpty()) {
+                                        IconButton(onClick = { newPlayerMobileInput = "" }) {
+                                            Icon(Icons.Default.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        addPlayer(newPlayerNameInput, selectedRole, venue, newPlayerMobileInput)
+                                    }
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("add_player_phone_input"),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
                             // Role Selection Chips
                             Text("Player Role (રોલ પસંદ કરો):", fontSize = 12.sp, color = CricTextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -755,7 +793,11 @@ fun MatchSetupScreen(
                                     ) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .clickable { viewModel.viewPlayer(player) }
+                                                .padding(vertical = 2.dp)
                                         ) {
                                             Box(
                                                 modifier = Modifier
@@ -773,12 +815,23 @@ fun MatchSetupScreen(
                                             }
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Column {
-                                                Text(
-                                                    text = player.name,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 14.sp,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Text(
+                                                        text = player.name,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 14.sp,
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                    if (player.phone.isNotBlank()) {
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Text(
+                                                            text = "📞 ${player.phone}",
+                                                            fontSize = 11.sp,
+                                                            color = CricTeal,
+                                                            fontWeight = FontWeight.SemiBold
+                                                        )
+                                                    }
+                                                }
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                     Surface(
                                                         color = MaterialTheme.colorScheme.surface,

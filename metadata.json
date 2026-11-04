@@ -1,6 +1,6 @@
 {
-  "name": "CricHeroes",
-  "description": "Grassroots cricket scoring and match management app with live ball-by-ball scoring, player stats, teams, and tournament management.",
+  "name": "Quick Heroes 11",
+  "description": "Quick Heroes 11 - Grassroots live cricket scoring, match management, and player statistics app.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

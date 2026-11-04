@@ -255,32 +255,7 @@ object SampleData {
         )
     }
 
-    val completedMatches = listOf(
-        CricketMatch(
-            id = "match_comp_01",
-            title = "Kutch T20 Championship - Final",
-            teamA = teamAhmedabad,
-            teamB = teamSaurashtra,
-            matchType = "Limited Overs",
-            ballType = "Leather Ball",
-            totalOvers = 20,
-            venue = "Sardar Patel Stadium, Ahmedabad",
-            tossWinner = teamAhmedabad,
-            tossDecision = "Bowl",
-            status = MatchStatus.COMPLETED,
-            innings = listOf(
-                Inning(
-                    id = "inn_c1", inningNumber = 1, battingTeam = teamSaurashtra, bowlingTeam = teamAhmedabad,
-                    totalRuns = 168, wickets = 7, legalBalls = 120, isCompleted = true
-                ),
-                Inning(
-                    id = "inn_c2", inningNumber = 2, battingTeam = teamAhmedabad, bowlingTeam = teamSaurashtra,
-                    totalRuns = 172, wickets = 5, legalBalls = 116, isCompleted = true
-                )
-            ),
-            resultMessage = "Ahmedabad Strikers won by 5 wickets (4 balls left)"
-        )
-    )
+    val completedMatches: List<CricketMatch> = emptyList()
 
     val tournaments = listOf(
         Tournament(
