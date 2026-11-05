@@ -1,4 +1,4 @@
-name: Build Play Store Android App Bundle (.aab)
+name: Build Play Store AAB and APK
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   workflow_dispatch: # Allows manual one-click build from GitHub Actions tab
 
 jobs:
-  build-aab:
-    name: Build & Package Play Store AAB
+  build-aab-and-apk:
+    name: Build Play Store AAB and Installable APK
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,6 @@ jobs:
           gradle-version: '9.3.1'
 
       # Step 1: Restore debug.keystore from debug.keystore.base64
-      # This fixes: "Keystore file '.../debug.keystore' not found for signing config 'debugConfig'"
       - name: Restore Debug Keystore
         run: |
           if [ -f "debug.keystore.base64" ]; then
@@ -42,8 +41,6 @@ jobs:
           fi
 
       # Step 2: Prepare Release Keystore (my-upload-key.jks)
-      # If user provided KEYSTORE_BASE64 in GitHub Secrets, decode it;
-      # otherwise auto-generate a valid upload keystore so release build always succeeds!
       - name: Prepare Release Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -58,37 +55,49 @@ jobs:
             keytool -genkey -v -keystore my-upload-key.jks -alias upload -keypass "${KEY_PASS:-android}" -storepass "${STORE_PASS:-android}" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Quick Heroes 11, OU=Cricket, O=QuickHeroes, L=Naliya, ST=Gujarat, C=IN"
           fi
 
-      # Step 3: Build the Play Store Release App Bundle (.aab)
-      - name: Build Android App Bundle (.aab)
+      # Step 3: Build both the Play Store Release App Bundle (.aab) and Installable APK (.apk)
+      - name: Build AAB and APK
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'android' }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'android' }}
         run: |
-          echo "Building Play Store Release AAB..."
+          echo "Building Play Store Release AAB and Direct Install APK..."
           chmod +x gradlew 2>/dev/null || true
           if [ -f "./gradlew" ]; then
-            ./gradlew :app:bundleRelease --no-daemon
+            ./gradlew :app:bundleRelease :app:assembleDebug --no-daemon
           else
-            gradle :app:bundleRelease --no-daemon
+            gradle :app:bundleRelease :app:assembleDebug --no-daemon
           fi
 
-      # Step 4: Locate the generated .aab file
-      - name: Locate AAB Output
-        id: locate_bundle
+      # Step 4: Locate outputs
+      - name: Locate Build Outputs
+        id: locate_outputs
         run: |
-          AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" | head -n 1)
-          if [ -z "$AAB_FILE" ]; then
-            echo "Error: No .aab file was generated!"
-            exit 1
+          AAB_FILE=$(find app/build/outputs/bundle -name "*.aab" 2>/dev/null | head -n 1)
+          APK_FILE=$(find app/build/outputs/apk -name "*.apk" 2>/dev/null | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            APK_FILE=$(find .build-outputs -name "*.apk" 2>/dev/null | head -n 1)
           fi
-          echo "Found bundle: $AAB_FILE"
-          echo "bundle_path=$AAB_FILE" >> $GITHUB_OUTPUT
+          echo "Found AAB: $AAB_FILE"
+          echo "Found APK: $APK_FILE"
+          echo "aab_path=$AAB_FILE" >> $GITHUB_OUTPUT
+          echo "apk_path=$APK_FILE" >> $GITHUB_OUTPUT
 
-      # Step 5: Upload the .aab as a downloadable artifact in GitHub Actions
-      - name: Upload Play Store AAB Artifact
+      # Step 5: Upload the Play Store AAB
+      - name: Upload Play Store AAB
+        if: steps.locate_outputs.outputs.aab_path != ''
         uses: actions/upload-artifact@v4
         with:
           name: QuickHeroes11-PlayStore-AAB
-          path: ${{ steps.locate_bundle.outputs.bundle_path }}
+          path: ${{ steps.locate_outputs.outputs.aab_path }}
+          retention-days: 30
+
+      # Step 6: Upload the Direct Install APK
+      - name: Upload Direct Install APK
+        if: steps.locate_outputs.outputs.apk_path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuickHeroes11-Installable-APK
+          path: ${{ steps.locate_outputs.outputs.apk_path }}
           retention-days: 30
