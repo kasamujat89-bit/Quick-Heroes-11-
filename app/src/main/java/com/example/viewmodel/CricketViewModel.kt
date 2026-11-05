@@ -22,6 +22,8 @@ import com.example.data.CelebrationType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.data.UserProfile
+import com.example.data.PlayerMatchRecord
+import com.example.data.LeaderboardItem
 
 sealed class AppScreen {
     object Splash : AppScreen()
@@ -108,17 +110,270 @@ class CricketViewModel : ViewModel() {
     private val _matchesList = MutableStateFlow<List<CricketMatch>>(emptyList())
     val matchesList: StateFlow<List<CricketMatch>> = _matchesList.asStateFlow()
 
-    // Clean players list with mobile numbers
+    // Clean players list with mobile numbers, fielding stats, and match histories
     private val _players = MutableStateFlow<List<Player>>(
         listOf(
-            Player("p_u1", "Kasam Jat", "Naliya", phone = "8980294520", matches = 34, runs = 1240, wickets = 48, role = "All-rounder"),
-            Player("p_u2", "Abuahemad Jat", "Naliya", phone = "9825101122", matches = 976, runs = 19336, wickets = 914, role = "Batsman"),
-            Player("p_u3", "Hasan.a.Jat", "Naliya", phone = "9723412345", matches = 829, runs = 13276, wickets = 599, role = "All-rounder"),
-            Player("p_u4", "Latif Jat (L-J)", "Naliya", phone = "9879054321", matches = 794, runs = 8825, wickets = 616, role = "Bowler"),
-            Player("p_u5", "M s jat", "Naliya", phone = "9909988776", matches = 758, runs = 7108, wickets = 480, role = "Wk-Batsman")
+            Player(
+                id = "p_u1",
+                name = "Kasam Jat",
+                city = "Naliya",
+                phone = "8980294520",
+                matches = 34,
+                runs = 1240,
+                wickets = 48,
+                catches = 22,
+                runOuts = 7,
+                stumpings = 0,
+                fifties = 8,
+                hundreds = 2,
+                highestScore = "88*",
+                bestBowling = "4/16",
+                strikeRate = 145.2f,
+                battingAvg = 44.3f,
+                bowlingEconomy = 6.4f,
+                role = "All-rounder",
+                battingStyle = "Right-hand bat",
+                bowlingStyle = "Right-arm medium",
+                jerseyNumber = 7,
+                teamsRepresented = listOf("Naliya Royals", "Kutch XI", "Naliya Super Kings"),
+                matchHistory = listOf(
+                    PlayerMatchRecord(
+                        matchId = "m1", matchTitle = "Naliya Royals vs Kutch Warriors", date = "03 Nov 2026",
+                        teamName = "Naliya Royals", opponentName = "Kutch Warriors",
+                        runs = 46, balls = 24, fours = 5, sixes = 2, wickets = 3, runsConceded = 18, oversBowled = "2.0", catches = 2, result = "Won by 24 runs"
+                    ),
+                    PlayerMatchRecord(
+                        matchId = "m2", matchTitle = "Naliya Royals vs Bhuj Strikers", date = "28 Oct 2026",
+                        teamName = "Naliya Royals", opponentName = "Bhuj Strikers",
+                        runs = 58, balls = 31, fours = 6, sixes = 3, wickets = 2, runsConceded = 22, oversBowled = "3.0", catches = 1, result = "Won by 6 wkts"
+                    ),
+                    PlayerMatchRecord(
+                        matchId = "m3", matchTitle = "Kutch XI vs Gandhidham Lions", date = "15 Oct 2026",
+                        teamName = "Kutch XI", opponentName = "Gandhidham Lions",
+                        runs = 34, balls = 19, fours = 4, sixes = 1, wickets = 1, runsConceded = 25, oversBowled = "2.0", catches = 0, result = "Lost by 12 runs"
+                    )
+                )
+            ),
+            Player(
+                id = "p_u2",
+                name = "Abuahemad Jat",
+                city = "Naliya",
+                phone = "9825101122",
+                matches = 976,
+                runs = 19336,
+                wickets = 914,
+                catches = 340,
+                runOuts = 42,
+                fifties = 88,
+                hundreds = 24,
+                highestScore = "142*",
+                bestBowling = "5/12",
+                strikeRate = 152.4f,
+                battingAvg = 48.6f,
+                bowlingEconomy = 6.1f,
+                role = "Batsman",
+                battingStyle = "Right-hand bat",
+                bowlingStyle = "Right-arm off break",
+                jerseyNumber = 18,
+                teamsRepresented = listOf("Naliya Royals", "Kutch Warriors"),
+                matchHistory = listOf(
+                    PlayerMatchRecord(
+                        matchId = "m1", matchTitle = "Naliya Royals vs Kutch Warriors", date = "03 Nov 2026",
+                        teamName = "Naliya Royals", opponentName = "Kutch Warriors",
+                        runs = 38, balls = 22, fours = 4, sixes = 2, wickets = 0, runsConceded = 0, oversBowled = "0.0", catches = 1, result = "Won by 24 runs"
+                    )
+                )
+            ),
+            Player(
+                id = "p_u3",
+                name = "Hasan.a.Jat",
+                city = "Naliya",
+                phone = "9723412345",
+                matches = 829,
+                runs = 13276,
+                wickets = 599,
+                catches = 280,
+                runOuts = 31,
+                fifties = 62,
+                hundreds = 14,
+                highestScore = "118*",
+                bestBowling = "6/22",
+                strikeRate = 141.0f,
+                battingAvg = 42.1f,
+                bowlingEconomy = 6.5f,
+                role = "All-rounder",
+                battingStyle = "Left-hand bat",
+                bowlingStyle = "Slow left-arm orthodox",
+                jerseyNumber = 7,
+                teamsRepresented = listOf("Naliya Royals", "Bhuj XI"),
+                matchHistory = listOf(
+                    PlayerMatchRecord(
+                        matchId = "m1", matchTitle = "Naliya Royals vs Kutch Warriors", date = "03 Nov 2026",
+                        teamName = "Naliya Royals", opponentName = "Kutch Warriors",
+                        runs = 27, balls = 16, fours = 3, sixes = 1, wickets = 2, runsConceded = 19, oversBowled = "2.0", catches = 1, result = "Won by 24 runs"
+                    )
+                )
+            ),
+            Player(
+                id = "p_u4",
+                name = "Latif Jat (L-J)",
+                city = "Naliya",
+                phone = "9879054321",
+                matches = 794,
+                runs = 8825,
+                wickets = 616,
+                catches = 195,
+                runOuts = 22,
+                fifties = 28,
+                hundreds = 4,
+                highestScore = "84",
+                bestBowling = "5/14",
+                strikeRate = 128.5f,
+                battingAvg = 26.4f,
+                bowlingEconomy = 5.8f,
+                role = "Bowler",
+                battingStyle = "Right-hand bat",
+                bowlingStyle = "Right-arm fast",
+                jerseyNumber = 99,
+                teamsRepresented = listOf("Naliya Royals", "Naliya Tigers"),
+                matchHistory = listOf(
+                    PlayerMatchRecord(
+                        matchId = "m1", matchTitle = "Naliya Royals vs Kutch Warriors", date = "03 Nov 2026",
+                        teamName = "Naliya Royals", opponentName = "Kutch Warriors",
+                        runs = 12, balls = 6, fours = 1, sixes = 1, wickets = 3, runsConceded = 15, oversBowled = "2.0", catches = 0, result = "Won by 24 runs"
+                    )
+                )
+            ),
+            Player(
+                id = "p_u5",
+                name = "M s jat",
+                city = "Naliya",
+                phone = "9909988776",
+                matches = 758,
+                runs = 7108,
+                wickets = 480,
+                catches = 410,
+                runOuts = 55,
+                stumpings = 82,
+                fifties = 32,
+                hundreds = 5,
+                highestScore = "96*",
+                bestBowling = "4/20",
+                strikeRate = 134.8f,
+                battingAvg = 31.2f,
+                bowlingEconomy = 6.9f,
+                role = "Wk-Batsman",
+                battingStyle = "Right-hand bat",
+                bowlingStyle = "Right-arm medium",
+                jerseyNumber = 45,
+                teamsRepresented = listOf("Naliya Royals", "Kutch Warriors"),
+                matchHistory = listOf(
+                    PlayerMatchRecord(
+                        matchId = "m1", matchTitle = "Naliya Royals vs Kutch Warriors", date = "03 Nov 2026",
+                        teamName = "Naliya Royals", opponentName = "Kutch Warriors",
+                        runs = 18, balls = 12, fours = 2, sixes = 0, wickets = 0, runsConceded = 0, oversBowled = "0.0", catches = 2, result = "Won by 24 runs"
+                    )
+                )
+            )
         )
     )
     val players: StateFlow<List<Player>> = _players.asStateFlow()
+
+    // Auto-save player into persistent roster (Item 13)
+    fun savePlayerToRoster(player: Player) {
+        _players.update { list ->
+            val existingIndex = list.indexOfFirst {
+                (it.phone.isNotBlank() && it.phone == player.phone) ||
+                it.name.trim().equals(player.name.trim(), ignoreCase = true)
+            }
+            if (existingIndex >= 0) {
+                val current = list[existingIndex]
+                val mergedTeams = (current.teamsRepresented + player.teamsRepresented).distinct()
+                val mergedHistory = if (player.matchHistory.isNotEmpty()) {
+                    (player.matchHistory + current.matchHistory).distinctBy { it.matchId.ifBlank { "${it.matchTitle}_${it.date}" } }
+                } else current.matchHistory
+
+                val updated = current.copy(
+                    phone = if (player.phone.isNotBlank()) player.phone else current.phone,
+                    city = if (player.city.isNotBlank()) player.city else current.city,
+                    role = player.role,
+                    runs = maxOf(current.runs, player.runs),
+                    wickets = maxOf(current.wickets, player.wickets),
+                    matches = maxOf(current.matches, player.matches),
+                    catches = maxOf(current.catches, player.catches),
+                    teamsRepresented = mergedTeams,
+                    matchHistory = mergedHistory
+                )
+                list.toMutableList().apply { set(existingIndex, updated) }
+            } else {
+                list + player
+            }
+        }
+    }
+
+    // Leaderboards for Community & Player Profile (Item 12)
+    fun getBattingLeaderboard(currentPlayerName: String = _userProfile.value.name): List<com.example.data.LeaderboardItem> {
+        val sorted = _players.value.sortedByDescending { it.runs }
+        return sorted.mapIndexed { idx, p ->
+            com.example.data.LeaderboardItem(
+                rank = idx + 1,
+                playerName = p.name,
+                teamOrCity = if (p.city.isNotBlank()) p.city else "Naliya",
+                statValue = "${p.runs} Runs",
+                statLabel = "${p.matches} Matches • Avg ${if (p.battingAvg > 0) String.format("%.1f", p.battingAvg) else "38.5"} • SR ${if (p.strikeRate > 0) String.format("%.1f", p.strikeRate) else "142.0"}",
+                phone = p.phone,
+                isCurrentUser = p.name.equals(currentPlayerName, ignoreCase = true)
+            )
+        }
+    }
+
+    fun getBowlingLeaderboard(currentPlayerName: String = _userProfile.value.name): List<com.example.data.LeaderboardItem> {
+        val sorted = _players.value.sortedByDescending { it.wickets }
+        return sorted.mapIndexed { idx, p ->
+            com.example.data.LeaderboardItem(
+                rank = idx + 1,
+                playerName = p.name,
+                teamOrCity = if (p.city.isNotBlank()) p.city else "Naliya",
+                statValue = "${p.wickets} Wkts",
+                statLabel = "${p.matches} Matches • Best ${p.bestBowling.ifBlank { "4/16" }} • Eco ${if (p.bowlingEconomy > 0) String.format("%.1f", p.bowlingEconomy) else "6.4"}",
+                phone = p.phone,
+                isCurrentUser = p.name.equals(currentPlayerName, ignoreCase = true)
+            )
+        }
+    }
+
+    fun getFieldingLeaderboard(currentPlayerName: String = _userProfile.value.name): List<com.example.data.LeaderboardItem> {
+        val sorted = _players.value.sortedByDescending { it.catches + it.runOuts }
+        return sorted.mapIndexed { idx, p ->
+            com.example.data.LeaderboardItem(
+                rank = idx + 1,
+                playerName = p.name,
+                teamOrCity = if (p.city.isNotBlank()) p.city else "Naliya",
+                statValue = "${p.catches} Catches",
+                statLabel = "${p.runOuts} Run-Outs • ${p.stumpings} Stumpings • ${p.matches} Matches",
+                phone = p.phone,
+                isCurrentUser = p.name.equals(currentPlayerName, ignoreCase = true)
+            )
+        }
+    }
+
+    fun getPlayerRank(playerName: String, category: String = "Batting"): Pair<Int, String> {
+        val list = when (category) {
+            "Bowling" -> getBowlingLeaderboard(playerName)
+            "Fielding" -> getFieldingLeaderboard(playerName)
+            else -> getBattingLeaderboard(playerName)
+        }
+        val item = list.find { it.playerName.equals(playerName, ignoreCase = true) }
+        val rank = item?.rank ?: 1
+        val title = when (rank) {
+            1 -> "🥇 રેન્ક #1 (Champion)"
+            2 -> "🥈 રેન્ક #2 (Elite)"
+            3 -> "🥉 રેન્ક #3 (Star)"
+            in 4..10 -> "⭐ ટોપ 10 (Top 10)"
+            else -> "રેન્ક #$rank"
+        }
+        return Pair(rank, title)
+    }
 
     // UI Dialog & Sheet states
     val isPlusMenuOpen = MutableStateFlow(false)
@@ -428,6 +683,9 @@ class CricketViewModel : ViewModel() {
         val strikerScore = inning.striker ?: return
         val bowlerScore = inning.activeBowler ?: return
 
+        // Auto-save new batsman into persistent roster (Item 13)
+        savePlayerToRoster(newBatsman)
+
         triggerCelebration(CelebrationType.WICKET)
 
         val isBowlerWicket = (dismissalType != DismissalType.RUN_OUT && dismissalType != DismissalType.RETIRED_HURT)
@@ -615,6 +873,9 @@ class CricketViewModel : ViewModel() {
         val match = _currentMatch.value ?: return
         val inning = match.currentInning ?: return
 
+        // Auto-save bowler into persistent roster (Item 13)
+        savePlayerToRoster(bowler)
+
         var bowlersList = inning.bowlerScores
         if (bowlersList.none { it.player.id == bowler.id }) {
             bowlersList = bowlersList + BowlerScore(player = bowler)
@@ -727,10 +988,113 @@ class CricketViewModel : ViewModel() {
             scorerId = _userProfile.value.id
         )
 
+        // Auto-save both team squads into persistent player roster
+        teamA.players.forEach { savePlayerToRoster(it) }
+        teamB.players.forEach { savePlayerToRoster(it) }
+
         _currentMatch.value = newMatch
         _isSpectatorMode.value = false
         _matchesList.update { listOf(newMatch) + it }
         navigateTo(AppScreen.LiveScoring)
+    }
+
+    // Auto-commit match stats to persistent player roster when match finishes (Item 13)
+    fun commitMatchStatsToPlayers(match: CricketMatch) {
+        val result = match.resultMessage ?: "Match Completed"
+        val allPlayersInMatch = (match.teamA.players + match.teamB.players).distinctBy { it.id }
+
+        val allBalls = match.innings.flatMap { it.ballHistory }
+        val allBatsmenScores = match.innings.flatMap { it.batsmenScores }
+        val allBowlerScores = match.innings.flatMap { it.bowlerScores }
+
+        allPlayersInMatch.forEach { player ->
+            val bScore = allBatsmenScores.find { it.player.id == player.id }
+            val bowScore = allBowlerScores.find { it.player.id == player.id }
+            val catchesCount = allBalls.count {
+                it.isWicket && it.dismissalType == DismissalType.CAUGHT && it.fielderName?.trim().equals(player.name.trim(), ignoreCase = true)
+            }
+            val runOutsCount = allBalls.count {
+                it.isWicket && it.dismissalType == DismissalType.RUN_OUT && it.fielderName?.trim().equals(player.name.trim(), ignoreCase = true)
+            }
+
+            val playerTeam = if (match.teamA.players.any { it.id == player.id }) match.teamA.name else match.teamB.name
+            val opponentTeam = if (match.teamA.players.any { it.id == player.id }) match.teamB.name else match.teamA.name
+
+            val runs = bScore?.runs ?: 0
+            val balls = bScore?.balls ?: 0
+            val fours = bScore?.fours ?: 0
+            val sixes = bScore?.sixes ?: 0
+            val wickets = bowScore?.wickets ?: 0
+            val runsConceded = bowScore?.runsConceded ?: 0
+            val overs = bowScore?.oversString ?: "0.0"
+
+            val matchRecord = com.example.data.PlayerMatchRecord(
+                matchId = match.id,
+                matchTitle = match.title,
+                date = "Today",
+                teamName = playerTeam,
+                opponentName = opponentTeam,
+                runs = runs,
+                balls = balls,
+                fours = fours,
+                sixes = sixes,
+                isOut = bScore?.isOut ?: false,
+                wickets = wickets,
+                runsConceded = runsConceded,
+                oversBowled = overs,
+                catches = catchesCount,
+                runOuts = runOutsCount,
+                result = result
+            )
+
+            // Update in persistent roster
+            _players.update { list ->
+                val idx = list.indexOfFirst {
+                    it.id == player.id || (it.phone.isNotBlank() && it.phone == player.phone) || it.name.trim().equals(player.name.trim(), ignoreCase = true)
+                }
+                if (idx >= 0) {
+                    val curr = list[idx]
+                    val updated = curr.copy(
+                        matches = curr.matches + 1,
+                        runs = curr.runs + runs,
+                        wickets = curr.wickets + wickets,
+                        catches = curr.catches + catchesCount,
+                        runOuts = curr.runOuts + runOutsCount,
+                        teamsRepresented = (curr.teamsRepresented + playerTeam).distinct(),
+                        matchHistory = listOf(matchRecord) + curr.matchHistory
+                    )
+                    list.toMutableList().apply { set(idx, updated) }
+                } else {
+                    val newP = player.copy(
+                        matches = 1,
+                        runs = runs,
+                        wickets = wickets,
+                        catches = catchesCount,
+                        runOuts = runOutsCount,
+                        teamsRepresented = listOf(playerTeam),
+                        matchHistory = listOf(matchRecord)
+                    )
+                    list + newP
+                }
+            }
+
+            // Update UserProfile if active user
+            if (player.id == _userProfile.value.id || player.name.trim().equals(_userProfile.value.name.trim(), ignoreCase = true)) {
+                _userProfile.update { u ->
+                    u.copy(
+                        matches = u.matches + 1,
+                        runs = u.runs + runs,
+                        wickets = u.wickets + wickets,
+                        catches = u.catches + catchesCount,
+                        runOuts = u.runOuts + runOutsCount,
+                        fours = u.fours + fours,
+                        sixes = u.sixes + sixes,
+                        teamsRepresented = (u.teamsRepresented + playerTeam).distinct(),
+                        matchHistory = listOf(matchRecord) + u.matchHistory
+                    )
+                }
+            }
+        }
     }
 
     private fun updateInningAndCheckMatchEnd(
@@ -774,6 +1138,11 @@ class CricketViewModel : ViewModel() {
             status = matchStatus,
             resultMessage = matchResult
         )
+
+        // Automatically commit career stats when match finishes
+        if (matchStatus == MatchStatus.COMPLETED) {
+            commitMatchStatsToPlayers(updatedMatch)
+        }
 
         _currentMatch.value = updatedMatch
         _matchesList.update { list ->

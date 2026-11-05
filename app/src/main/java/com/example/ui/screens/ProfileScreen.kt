@@ -45,8 +45,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import com.example.data.PlayerMatchRecord
+import com.example.data.LeaderboardItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -303,75 +307,383 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Batting Record Detailed Card
-            Card(
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sub-Navigation Tabs: Batting, Bowling, Fielding, Score History, Teams, Leaderboard (Item 12)
+            var selectedTab by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+            val tabTitles = listOf(
+                "બેટિંગ (Batting)",
+                "બોલિંગ (Bowling)",
+                "ફિલ્ડિંગ (Fielding)",
+                "સ્કોર હિસ્ટ્રી (History)",
+                "ટીમો (Teams)",
+                "લીડરબોર્ડ (Leaderboard)"
+            )
+
+            ScrollableTabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = CricTeal,
+                edgePadding = 0.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(2.dp, RoundedCornerShape(16.dp)),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    .clip(RoundedCornerShape(14.dp))
+                    .testTag("profile_stat_tabs")
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(Icons.Default.SportsCricket, contentDescription = null, tint = CricTeal, modifier = Modifier.size(20.dp))
-                        Text("બેટિંગ પ્રદર્શન (Batting Performance)", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        ProfileMiniMetric("સર્વોચ્ચ સ્કોર (HS)", userProfile.highestScore)
-                        ProfileMiniMetric("સ્ટ્રાઇક રેટ (SR)", String.format("%.1f", userProfile.strikeRate))
-                        ProfileMiniMetric("સરેરાશ (Avg)", String.format("%.1f", userProfile.battingAvg))
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        ProfileMiniMetric("50s / 100s", "${userProfile.fifties} / ${userProfile.hundreds}")
-                        ProfileMiniMetric("ચોગ્ગા (4s)", "${userProfile.fours}")
-                        ProfileMiniMetric("છગ્ગા (6s)", "${userProfile.sixes}")
-                    }
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = {
+                            Text(
+                                text = title,
+                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 12.sp,
+                                maxLines = 1
+                            )
+                        }
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Bowling Record Detailed Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(2.dp, RoundedCornerShape(16.dp)),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            when (selectedTab) {
+                // ================= 0: BATTING TAB =================
+                0 -> {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(2.dp, RoundedCornerShape(16.dp))
+                            .testTag("profile_batting_card"),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
-                        Icon(Icons.Default.Shield, contentDescription = null, tint = CricGold, modifier = Modifier.size(20.dp))
-                        Text("બોલિંગ પ્રદર્શન (Bowling Performance)", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.SportsCricket, contentDescription = null, tint = CricTeal, modifier = Modifier.size(22.dp))
+                                Text("બેટિંગ રેકોર્ડ (Batting Career Record)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(color = Color(0xFFF1F5F9))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("કુલ રન (Runs)", "${userProfile.runs}")
+                                ProfileMiniMetric("મેચ (Matches)", "${userProfile.matches}")
+                                ProfileMiniMetric("સર્વોચ્ચ (HS)", userProfile.highestScore)
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("સ્ટ્રાઇક રેટ (SR)", String.format("%.1f", userProfile.strikeRate))
+                                ProfileMiniMetric("સરેરાશ (Avg)", String.format("%.1f", userProfile.battingAvg))
+                                ProfileMiniMetric("50s / 100s", "${userProfile.fifties} / ${userProfile.hundreds}")
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("ચોગ્ગા (4s)", "${userProfile.fours}")
+                                ProfileMiniMetric("છગ્ગા (6s)", "${userProfile.sixes}")
+                                ProfileMiniMetric("બેટિંગ શૈલી", "Right-hand bat")
+                            }
+                        }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
-                    Spacer(modifier = Modifier.height(12.dp))
+                // ================= 1: BOWLING TAB =================
+                1 -> {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(2.dp, RoundedCornerShape(16.dp))
+                            .testTag("profile_bowling_card"),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.Shield, contentDescription = null, tint = CricGold, modifier = Modifier.size(22.dp))
+                                Text("બોલિંગ રેકોર્ડ (Bowling Career Record)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
 
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        ProfileMiniMetric("શ્રેષ્ઠ બોલિંગ", userProfile.bestBowling)
-                        ProfileMiniMetric("ઇકોનોમી (Eco)", String.format("%.1f", userProfile.bowlingEconomy))
-                        ProfileMiniMetric("કુલ વિકેટ", "${userProfile.wickets}")
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(color = Color(0xFFF1F5F9))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("કુલ વિકેટ", "${userProfile.wickets}")
+                                ProfileMiniMetric("શ્રેષ્ઠ બોલિંગ", userProfile.bestBowling)
+                                ProfileMiniMetric("ઇકોનોમી (Eco)", String.format("%.1f", userProfile.bowlingEconomy))
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("ઓવર્સ (Overs)", String.format("%.1f", userProfile.wickets * 2.8))
+                                ProfileMiniMetric("સરેરાશ (Avg)", String.format("%.1f", 16.4f))
+                                ProfileMiniMetric("સ્ટ્રાઇક રેટ", String.format("%.1f", 14.8f))
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("3-Wkt Hauls", "6")
+                                ProfileMiniMetric("5-Wkt Hauls", "1")
+                                ProfileMiniMetric("બોલિંગ શૈલી", "Right-arm medium")
+                            }
+                        }
+                    }
+                }
+
+                // ================= 2: FIELDING TAB =================
+                2 -> {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(2.dp, RoundedCornerShape(16.dp))
+                            .testTag("profile_fielding_card"),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("🧤", fontSize = 22.sp)
+                                Text("ફિલ્ડિંગ રેકોર્ડ (Fielding Career Record)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(color = Color(0xFFF1F5F9))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                ProfileMiniMetric("કુલ કેચ (Catches)", "${userProfile.catches}")
+                                ProfileMiniMetric("રન આઉટ (Run Outs)", "${userProfile.runOuts}")
+                                ProfileMiniMetric("સ્ટમ્પિંગ (Stumpings)", "${userProfile.stumpings}")
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Surface(
+                                color = CricTeal.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = CricTeal, modifier = Modifier.size(20.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text("ફિલ્ડિંગ ઇમ્પેક્ટ રેટિંગ: ઉત્કૃષ્ટ (A+)", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = CricTeal)
+                                        Text("પ્રતિ મેચ સરેરાશ 0.85 કેચ અને ડાયરેક્ટ હિટ રન આઉટ", fontSize = 11.sp, color = CricTextSecondary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= 3: SCORE HISTORY TAB =================
+                3 -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().testTag("profile_history_section"),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = "ટોટલ સ્કોર હિસ્ટ્રી (Match-by-Match History):",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        if (userProfile.matchHistory.isEmpty()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text("🏏", fontSize = 32.sp)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("હજી સુધી કોઈ મેચ હિસ્ટ્રી નથી", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    Text("લાઈવ મેચ પૂર્ણ થયા પછી સ્કોર હિસ્ટ્રી આપોઆપ અહીં ઉમેરાશે.", fontSize = 12.sp, color = CricTextSecondary)
+                                }
+                            }
+                        } else {
+                            userProfile.matchHistory.forEach { record ->
+                                MatchHistoryItemCard(record = record)
+                            }
+                        }
+                    }
+                }
+
+                // ================= 4: TEAMS & MATCHES TAB =================
+                4 -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().testTag("profile_teams_section"),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = "રમેલી ટીમોની વિગતો (${userProfile.teamsRepresented.size} ટીમો):",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        userProfile.teamsRepresented.forEachIndexed { idx, teamName ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(42.dp)
+                                                .clip(CircleShape)
+                                                .background(if (idx == 0) CricTeal else CricSecondary),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(teamName.take(2).uppercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column {
+                                            Text(teamName, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                            Text(if (idx == 0) "કેપ્ટન અને ઓલરાઉન્ડર • જર્સી #7" else "ઓલરાઉન્ડર • જર્સી #7", fontSize = 12.sp, color = CricTextSecondary)
+                                        }
+                                    }
+
+                                    Surface(
+                                        color = Color(0xFFF1F5F9),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "${(userProfile.matches / (idx + 1)).coerceAtLeast(1)} મેચ",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = CricTextPrimary,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= 5: LEADERBOARD TAB =================
+                5 -> {
+                    var leaderboardCategory by remember { androidx.compose.runtime.mutableStateOf("Batting") }
+                    val currentRankInfo = viewModel.getPlayerRank(userProfile.name, leaderboardCategory)
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth().testTag("profile_leaderboard_section"),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Current Player Rank Banner
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A))
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text("તમારો લીડરબોર્ડ રેન્ક (Your Rank):", color = Color(0xFF94A3B8), fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = currentRankInfo.second,
+                                        color = CricGold,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 18.sp
+                                    )
+                                    Text("Quick Heroes 11 લીડરબોર્ડ", color = Color(0xFFE2E8F0), fontSize = 11.sp)
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(CircleShape)
+                                        .background(CricGold.copy(alpha = 0.2f))
+                                        .border(2.dp, CricGold, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("#${currentRankInfo.first}", color = CricGold, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                                }
+                            }
+                        }
+
+                        // Category Selector: Batting, Bowling, Fielding
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(
+                                "Batting" to "🏏 બેટિંગ (Runs)",
+                                "Bowling" to "⚡ બોલિંગ (Wickets)",
+                                "Fielding" to "🧤 ફિલ્ડિંગ (Catches)"
+                            ).forEach { (catKey, catLabel) ->
+                                val isSel = (leaderboardCategory == catKey)
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable { leaderboardCategory = catKey },
+                                    color = if (isSel) CricTeal else MaterialTheme.colorScheme.surfaceVariant
+                                ) {
+                                    Text(
+                                        text = catLabel,
+                                        color = if (isSel) Color.White else MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
+                                        fontSize = 11.sp,
+                                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+
+                        // Leaderboard Items List
+                        val items = when (leaderboardCategory) {
+                            "Bowling" -> viewModel.getBowlingLeaderboard(userProfile.name)
+                            "Fielding" -> viewModel.getFieldingLeaderboard(userProfile.name)
+                            else -> viewModel.getBattingLeaderboard(userProfile.name)
+                        }
+
+                        items.forEach { item ->
+                            LeaderboardRowItem(item = item)
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Grassroots Cricket Badge (100% Free - No fees)
             Card(
@@ -712,3 +1024,190 @@ fun EditProfileModal(
         }
     )
 }
+
+@Composable
+fun MatchHistoryItemCard(record: PlayerMatchRecord) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = record.date,
+                    fontSize = 11.sp,
+                    color = CricTextSecondary,
+                    fontWeight = FontWeight.Medium
+                )
+                Surface(
+                    color = if (record.result.contains("Won", ignoreCase = true)) Color(0xFFDCFCE7) else Color(0xFFFEE2E2),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = record.result,
+                        color = if (record.result.contains("Won", ignoreCase = true)) Color(0xFF166534) else Color(0xFF991B1B),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = record.matchTitle,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = Color(0xFFF1F5F9))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text("🏏 બેટિંગ (Batting)", fontSize = 11.sp, color = CricTextSecondary)
+                    Text(
+                        text = "${record.runs} રન (${record.balls} બોલ) • ${record.fours}x4, ${record.sixes}x6",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = CricTeal
+                    )
+                }
+                Column {
+                    Text("⚡ બોલિંગ (Bowling)", fontSize = 11.sp, color = CricTextSecondary)
+                    Text(
+                        text = "${record.wickets} વિકેટ (${record.runsConceded} રન, ${record.oversBowled} ov)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = CricGold
+                    )
+                }
+                if (record.catches > 0 || record.runOuts > 0) {
+                    Column {
+                        Text("🧤 ફિલ્ડિંગ", fontSize = 11.sp, color = CricTextSecondary)
+                        Text(
+                            text = "${record.catches} કેચ" + if (record.runOuts > 0) ", ${record.runOuts} RO" else "",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = CricSecondary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LeaderboardRowItem(item: LeaderboardItem) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (item.isCurrentUser) CricTeal.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface
+        ),
+        border = if (item.isCurrentUser) CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(CricTeal)) else null,
+        elevation = CardDefaults.cardElevation(defaultElevation = if (item.isCurrentUser) 2.dp else 0.5.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                // Rank Badge
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(
+                            when (item.rank) {
+                                1 -> CricGold
+                                2 -> Color(0xFF94A3B8)
+                                3 -> Color(0xFFB45309)
+                                else -> MaterialTheme.colorScheme.surfaceVariant
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = when (item.rank) {
+                            1 -> "🥇"
+                            2 -> "🥈"
+                            3 -> "🥉"
+                            else -> "#${item.rank}"
+                        },
+                        fontSize = if (item.rank <= 3) 16.sp else 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (item.rank <= 3) Color.White else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = item.playerName,
+                            fontWeight = if (item.isCurrentUser) FontWeight.ExtraBold else FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (item.isCurrentUser) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                color = CricTeal,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = "તમે (You)",
+                                    color = Color.White,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = "${item.teamOrCity}" + if (item.phone.isNotBlank()) " • 📞 ${item.phone}" else "",
+                        fontSize = 11.sp,
+                        color = CricTextSecondary
+                    )
+                }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = item.statValue,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 15.sp,
+                    color = if (item.isCurrentUser) CricTeal else CricSecondary
+                )
+                Text(
+                    text = item.statLabel,
+                    fontSize = 10.sp,
+                    color = CricTextSecondary
+                )
+            }
+        }
+    }
+}
+

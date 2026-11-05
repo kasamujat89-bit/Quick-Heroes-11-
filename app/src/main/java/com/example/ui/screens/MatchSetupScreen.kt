@@ -97,6 +97,7 @@ fun MatchSetupScreen(
     // Step 1: Players & Squad (ખેલાડીઓના નામ ઉમેરો)
     // Step 2: Toss & Openers (ટોસ અને ઓપનિંગ ખેલાડીઓ)
     var currentStep by remember { mutableIntStateOf(0) }
+    val savedRoster by viewModel.players.collectAsState()
 
     // Step 0: Team Names & Settings
     var teamAName by remember { mutableStateOf("Naliya Royals") }
@@ -170,10 +171,13 @@ fun MatchSetupScreen(
         } else {
             teamBPlayers = teamBPlayers + newPlayer
         }
+        // Auto-save to persistent roster so user never has to re-add (Item 13)
+        viewModel.savePlayerToRoster(newPlayer)
+
         newPlayerNameInput = ""
         newPlayerMobileInput = ""
         inputErrorText = null
-        successAddMessage = "✓ $trimmed ને $activeTeamName માં ઉમેર્યા!"
+        successAddMessage = "✓ $trimmed ને $activeTeamName માં ઉમેર્યા અને કાયમ માટે સેવ કર્યા!"
     }
 
     // Step 2: Toss & Openers
@@ -662,38 +666,57 @@ fun MatchSetupScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // 1-CLICK FAST SUGGESTIONS CHIPS
-                    Text(
-                        text = "⚡ ઝડપથી ઉમેરો (Suggested Players - Tap to Add):",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    // 1-CLICK SAVED ROSTER SELECTION (Item 13: Auto-saved Players)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "📂 સેવ થયેલા ખેલાડીઓ (Saved Roster - Tap to Add):",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            color = CricTeal
+                        )
+                        Surface(
+                            color = CricTeal.copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "${savedRoster.size} સેવ થયેલા",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = CricTeal,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(6.dp))
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        listOf(
-                            Triple("Kasam Jat", "All-rounder", "Naliya"),
-                            Triple("Latif Jat", "Bowler", "Naliya"),
-                            Triple("Abuahemad Jat", "Batsman", "Naliya"),
-                            Triple("Hasan Jat", "All-rounder", "Naliya"),
-                            Triple("Imran Pathan", "All-rounder", "Bhuj"),
-                            Triple("Hardik Solanki", "Bowler", "Rajkot"),
-                            Triple("Suresh Jadeja", "Batsman", "Gandhidham"),
-                            Triple("Tariq Baloch", "Bowler", "Bhuj"),
-                            Triple("Ali Mohammad", "Batsman", "Mandvi"),
-                            Triple("Rashid Khan", "Bowler", "Bhuj")
-                        ).forEach { (name, role, city) ->
-                            val alreadyInTeam = activeList.any { it.name.equals(name, ignoreCase = true) }
+                        savedRoster.forEach { savedP ->
+                            val alreadyInTeam = activeList.any {
+                                it.id == savedP.id || (it.phone.isNotBlank() && it.phone == savedP.phone) || it.name.trim().equals(savedP.name.trim(), ignoreCase = true)
+                            }
                             Surface(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
                                     .clickable(enabled = !alreadyInTeam) {
-                                        addPlayer(name, role, city)
+                                        val pToAdd = savedP.copy(
+                                            id = "p_${System.currentTimeMillis()}_${(100..999).random()}"
+                                        )
+                                        if (activeSquadTab == 0) {
+                                            teamAPlayers = teamAPlayers + pToAdd
+                                        } else {
+                                            teamBPlayers = teamBPlayers + pToAdd
+                                        }
+                                        successAddMessage = "✓ ${savedP.name} ને $activeTeamName માં ઉમેર્યા!"
                                     },
                                 color = if (alreadyInTeam) Color(0xFFE2E8F0) else CricTealLight,
                                 shape = RoundedCornerShape(16.dp),
@@ -711,7 +734,7 @@ fun MatchSetupScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = "$name ($role)",
+                                        text = "${savedP.name} (${savedP.role})" + if (savedP.phone.isNotBlank()) " 📞" else "",
                                         color = if (alreadyInTeam) Color.Gray else CricTeal,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium

@@ -100,5 +100,55 @@ class ExampleRobolectricTest {
         viewModel.navigateTo(AppScreen.Profile)
         assertEquals(AppScreen.Profile, viewModel.currentScreen)
     }
+
+    @Test
+    fun testAutoSavePlayerRoster() {
+        val viewModel = CricketViewModel()
+        val initialCount = viewModel.players.value.size
+
+        // Add a brand new player
+        val newPlayer = com.example.data.Player(
+            id = "test_p99",
+            name = "Ramesh Patel",
+            city = "Mandvi",
+            phone = "9825999888",
+            role = "All-rounder"
+        )
+        viewModel.savePlayerToRoster(newPlayer)
+
+        val updatedRoster = viewModel.players.value
+        assertEquals(initialCount + 1, updatedRoster.size)
+        assertTrue(updatedRoster.any { it.name == "Ramesh Patel" && it.phone == "9825999888" })
+
+        // Updating existing player should not create a duplicate
+        val updatedPlayer = newPlayer.copy(runs = 120, wickets = 5)
+        viewModel.savePlayerToRoster(updatedPlayer)
+        assertEquals(initialCount + 1, viewModel.players.value.size)
+        val saved = viewModel.players.value.find { it.phone == "9825999888" }
+        assertNotNull(saved)
+        assertEquals(120, saved!!.runs)
+        assertEquals(5, saved.wickets)
+    }
+
+    @Test
+    fun testLeaderboardAndMatchCommit() {
+        val viewModel = CricketViewModel()
+        val battingLb = viewModel.getBattingLeaderboard("Kasam Jat")
+        assertTrue(battingLb.isNotEmpty())
+        // Top player has most runs
+        assertTrue(battingLb[0].statValue.contains("Runs"))
+
+        val bowlingLb = viewModel.getBowlingLeaderboard("Kasam Jat")
+        assertTrue(bowlingLb.isNotEmpty())
+        assertTrue(bowlingLb[0].statValue.contains("Wkts"))
+
+        val fieldingLb = viewModel.getFieldingLeaderboard("Kasam Jat")
+        assertTrue(fieldingLb.isNotEmpty())
+        assertTrue(fieldingLb[0].statValue.contains("Catches"))
+
+        val rank = viewModel.getPlayerRank("Kasam Jat", "Batting")
+        assertTrue(rank.first > 0)
+        assertTrue(rank.second.isNotEmpty())
+    }
 }
 

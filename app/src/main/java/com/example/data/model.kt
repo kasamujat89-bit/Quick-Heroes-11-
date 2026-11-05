@@ -24,6 +24,35 @@ enum class MatchStatus {
     COMPLETED
 }
 
+data class PlayerMatchRecord(
+    val matchId: String = "",
+    val matchTitle: String,
+    val date: String,
+    val teamName: String,
+    val opponentName: String,
+    val runs: Int = 0,
+    val balls: Int = 0,
+    val fours: Int = 0,
+    val sixes: Int = 0,
+    val isOut: Boolean = false,
+    val wickets: Int = 0,
+    val runsConceded: Int = 0,
+    val oversBowled: String = "0.0",
+    val catches: Int = 0,
+    val runOuts: Int = 0,
+    val result: String = "Won"
+)
+
+data class LeaderboardItem(
+    val rank: Int,
+    val playerName: String,
+    val teamOrCity: String,
+    val statValue: String,
+    val statLabel: String,
+    val phone: String = "",
+    val isCurrentUser: Boolean = false
+)
+
 data class Player(
     val id: String,
     val name: String,
@@ -32,12 +61,24 @@ data class Player(
     val matches: Int = 0,
     val runs: Int = 0,
     val wickets: Int = 0,
+    val catches: Int = 0,
+    val runOuts: Int = 0,
+    val stumpings: Int = 0,
+    val fifties: Int = 0,
+    val hundreds: Int = 0,
+    val highestScore: String = "-",
+    val bestBowling: String = "-",
+    val strikeRate: Float = 0f,
+    val battingAvg: Float = 0f,
+    val bowlingEconomy: Float = 0f,
     val isPro: Boolean = false,
     val isFollowing: Boolean = false,
     val role: String = "All-rounder", // Batsman, Bowler, All-rounder, Wk-Batsman
     val battingStyle: String = "Right-hand bat",
     val bowlingStyle: String = "Right-arm medium",
-    val jerseyNumber: Int = 7
+    val jerseyNumber: Int = 7,
+    val teamsRepresented: List<String> = emptyList(),
+    val matchHistory: List<PlayerMatchRecord> = emptyList()
 )
 
 data class Team(
@@ -248,6 +289,9 @@ data class UserProfile(
     val matches: Int = 34,
     val runs: Int = 1240,
     val wickets: Int = 48,
+    val catches: Int = 22,
+    val runOuts: Int = 7,
+    val stumpings: Int = 0,
     val highestScore: String = "88*",
     val strikeRate: Float = 145.2f,
     val battingAvg: Float = 44.3f,
@@ -256,6 +300,57 @@ data class UserProfile(
     val fifties: Int = 8,
     val hundreds: Int = 2,
     val fours: Int = 112,
-    val sixes: Int = 54
+    val sixes: Int = 54,
+    val teamsRepresented: List<String> = listOf("Naliya Royals", "Kutch XI", "Naliya Super Kings"),
+    val matchHistory: List<PlayerMatchRecord> = listOf(
+        PlayerMatchRecord(
+            matchId = "m_hist_1",
+            matchTitle = "Naliya Royals vs Kutch Warriors",
+            date = "03 Nov 2026",
+            teamName = "Naliya Royals",
+            opponentName = "Kutch Warriors",
+            runs = 46,
+            balls = 24,
+            fours = 5,
+            sixes = 2,
+            wickets = 3,
+            runsConceded = 18,
+            oversBowled = "2.0",
+            catches = 2,
+            result = "Won by 24 runs"
+        ),
+        PlayerMatchRecord(
+            matchId = "m_hist_2",
+            matchTitle = "Naliya Royals vs Bhuj Strikers",
+            date = "28 Oct 2026",
+            teamName = "Naliya Royals",
+            opponentName = "Bhuj Strikers",
+            runs = 58,
+            balls = 31,
+            fours = 6,
+            sixes = 3,
+            wickets = 2,
+            runsConceded = 22,
+            oversBowled = "3.0",
+            catches = 1,
+            result = "Won by 6 wkts"
+        ),
+        PlayerMatchRecord(
+            matchId = "m_hist_3",
+            matchTitle = "Kutch XI vs Gandhidham Lions",
+            date = "15 Oct 2026",
+            teamName = "Kutch XI",
+            opponentName = "Gandhidham Lions",
+            runs = 34,
+            balls = 19,
+            fours = 4,
+            sixes = 1,
+            wickets = 1,
+            runsConceded = 25,
+            oversBowled = "2.0",
+            catches = 0,
+            result = "Lost by 12 runs"
+        )
+    )
 )
 

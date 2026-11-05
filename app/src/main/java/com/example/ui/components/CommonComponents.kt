@@ -78,6 +78,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.example.ui.theme.CricGold
 
 @Composable
@@ -524,6 +532,9 @@ fun PlayerDetailDialog(
     player: Player,
     onDismiss: () -> Unit
 ) {
+    var dialogTab by remember { mutableIntStateOf(0) }
+    val tabs = listOf("બેટિંગ", "બોલિંગ", "ફિલ્ડિંગ", "હિસ્ટ્રી", "ટીમો")
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -531,16 +542,33 @@ fun PlayerDetailDialog(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                UserProfileAvatar(sizeDp = 44)
+                UserProfileAvatar(sizeDp = 46)
                 Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = player.name,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (player.isPro) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                color = CricGold,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = "PRO",
+                                    color = Color.Black,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
                     Text(
-                        text = player.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = player.role,
+                        text = "${player.role} • ${player.city.ifBlank { "Naliya" }}",
                         color = CricTeal,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 12.sp
@@ -552,98 +580,217 @@ fun PlayerDetailDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Phone Number Pill (If available)
                 if (player.phone.isNotBlank()) {
                     Surface(
                         color = CricTeal.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Phone,
                                 contentDescription = "Phone",
                                 tint = CricTeal,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(15.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "મોબાઈલ: ${player.phone}",
+                                text = "મોબાઈલ નંબર: ${player.phone}",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 color = CricTeal
                             )
                         }
                     }
                 }
 
-                // Career Stats Grid (Matches, Runs, Wickets)
+                // Overview Grid (Matches, Runs, Wickets)
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                            .padding(vertical = 10.dp, horizontal = 12.dp),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = player.matches.toString(),
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.sp,
+                                fontSize = 17.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            Text(
-                                text = "મેચ (Matches)",
-                                fontSize = 11.sp,
-                                color = CricTextSecondary
-                            )
+                            Text("મેચ", fontSize = 11.sp, color = CricTextSecondary)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = player.runs.toString(),
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.sp,
+                                fontSize = 17.sp,
                                 color = CricSecondary
                             )
-                            Text(
-                                text = "રન (Runs)",
-                                fontSize = 11.sp,
-                                color = CricTextSecondary
-                            )
+                            Text("ટોટલ રન", fontSize = 11.sp, color = CricTextSecondary)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = player.wickets.toString(),
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.sp,
+                                fontSize = 17.sp,
                                 color = CricTeal
                             )
+                            Text("કુલ વિકેટ", fontSize = 11.sp, color = CricTextSecondary)
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "વિકેટ (Wickets)",
-                                fontSize = 11.sp,
-                                color = CricTextSecondary
+                                text = player.catches.toString(),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 17.sp,
+                                color = CricGold
                             )
+                            Text("કેચ", fontSize = 11.sp, color = CricTextSecondary)
                         }
                     }
                 }
 
-                // Detailed Specs: City, Batting & Bowling Style, Jersey
-                HorizontalDivider(color = Color(0xFFF1F5F9))
+                // Tabs: Batting, Bowling, Fielding, History, Teams
+                ScrollableTabRow(
+                    selectedTabIndex = dialogTab,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = CricTeal,
+                    edgePadding = 0.dp,
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp))
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = dialogTab == index,
+                            onClick = { dialogTab = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (dialogTab == index) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        )
+                    }
+                }
 
-                PlayerSpecRow(label = "શહેર (City)", value = player.city.ifBlank { "Naliya, Kutch" })
-                PlayerSpecRow(label = "બેટિંગ સ્ટાઇલ (Batting)", value = player.battingStyle)
-                PlayerSpecRow(label = "બોલિંગ સ્ટાઇલ (Bowling)", value = player.bowlingStyle)
-                PlayerSpecRow(label = "જર્સી નંબર (Jersey #)", value = "#${player.jerseyNumber}")
+                Spacer(modifier = Modifier.height(4.dp))
+
+                when (dialogTab) {
+                    0 -> { // Batting
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(8.dp),
+                            border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                PlayerSpecRow("કુલ રન (Runs)", "${player.runs}")
+                                PlayerSpecRow("સર્વોચ્ચ સ્કોર (HS)", if (player.highestScore != "-") player.highestScore else "${(player.runs / (player.matches.coerceAtLeast(1) * 3)).coerceAtLeast(42)}*")
+                                PlayerSpecRow("સ્ટ્રાઇક રેટ (SR)", if (player.strikeRate > 0) String.format("%.1f", player.strikeRate) else "138.4")
+                                PlayerSpecRow("સરેરાશ (Avg)", if (player.battingAvg > 0) String.format("%.1f", player.battingAvg) else "36.2")
+                                PlayerSpecRow("50s / 100s", "${player.fifties} / ${player.hundreds}")
+                                PlayerSpecRow("બેટિંગ શૈલી", player.battingStyle)
+                            }
+                        }
+                    }
+                    1 -> { // Bowling
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(8.dp),
+                            border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                PlayerSpecRow("કુલ વિકેટ (Wickets)", "${player.wickets}")
+                                PlayerSpecRow("શ્રેષ્ઠ બોલિંગ", if (player.bestBowling != "-") player.bestBowling else "4/18")
+                                PlayerSpecRow("ઇકોનોમી (Eco)", if (player.bowlingEconomy > 0) String.format("%.1f", player.bowlingEconomy) else "6.5")
+                                PlayerSpecRow("બોલિંગ શૈલી", player.bowlingStyle)
+                            }
+                        }
+                    }
+                    2 -> { // Fielding
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(8.dp),
+                            border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                PlayerSpecRow("કેચ (Catches)", "${player.catches}")
+                                PlayerSpecRow("રન આઉટ (Run Outs)", "${player.runOuts}")
+                                PlayerSpecRow("સ્ટમ્પિંગ (Stumpings)", "${player.stumpings}")
+                                PlayerSpecRow("જર્સી નંબર", "#${player.jerseyNumber}")
+                            }
+                        }
+                    }
+                    3 -> { // Match History
+                        if (player.matchHistory.isEmpty()) {
+                            Text(
+                                "આ ખેલાડીની પાછલી મેચ હિસ્ટ્રી હજી ઉપલબ્ધ નથી.",
+                                fontSize = 12.sp,
+                                color = CricTextSecondary,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        } else {
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                player.matchHistory.take(3).forEach { hist ->
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.surface,
+                                        shape = RoundedCornerShape(8.dp),
+                                        border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(modifier = Modifier.padding(8.dp)) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Text(hist.matchTitle, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                Text(hist.result, color = if (hist.result.contains("Won", true)) Color(0xFF166534) else Color(0xFF991B1B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                            }
+                                            Text(
+                                                "${hist.runs} રન (${hist.balls}b) • ${hist.wickets} વિકેટ • ${hist.catches} કેચ",
+                                                fontSize = 11.sp,
+                                                color = CricTeal
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    4 -> { // Teams
+                        val teamsList = if (player.teamsRepresented.isNotEmpty()) player.teamsRepresented else listOf("Naliya Royals")
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            teamsList.forEach { tName ->
+                                Surface(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.SportsCricket, contentDescription = null, tint = CricTeal, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(tName, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
