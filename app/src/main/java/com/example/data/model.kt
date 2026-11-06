@@ -78,7 +78,8 @@ data class Player(
     val bowlingStyle: String = "Right-arm medium",
     val jerseyNumber: Int = 7,
     val teamsRepresented: List<String> = emptyList(),
-    val matchHistory: List<PlayerMatchRecord> = emptyList()
+    val matchHistory: List<PlayerMatchRecord> = emptyList(),
+    val badges: List<DigitalBadge> = emptyList()
 )
 
 data class Team(
@@ -209,9 +210,9 @@ data class Inning(
 }
 
 enum class CelebrationType(val title: String, val subtitle: String, val colorHex: Long) {
-    FOUR("FOUR! ૪ રન!", "શાનદાર ચોગ્ગો! બોલ બાઉન્ડ્રી પાર!", 0xFF2563EB),
-    SIX("SIX! ૬ રન!", "ગગનચુંબી છગ્ગો! બોલ સીધો સ્ટેન્ડમાં!", 0xFF16A34A),
-    WICKET("WICKET! વિકેટ!", "ખેલાડી આઉટ! બોલરને મોટી સફળતા!", 0xFFDC2626)
+    FOUR("FOUR!", "Magnificent Four! Ball races to the boundary!", 0xFF2563EB),
+    SIX("SIX!", "Massive Six! Towering strike into the stands!", 0xFF16A34A),
+    WICKET("WICKET!", "Batsman is Out! Big breakthrough for the bowler!", 0xFFDC2626)
 }
 
 data class CricketMatch(
@@ -274,16 +275,18 @@ data class Tournament(
     val city: String,
     val teamsCount: Int,
     val startDate: String,
-    val prizeMoney: String,
+    val prizeMoney: String = "Trophy & Medals",
+    val entryFee: String = "100% Free",
     val bannerColor: Long = 0xFFDC2626
 )
 
 data class UserProfile(
     val id: String = "user_kasam_jat",
     val name: String = "Kasam Jat",
-    val title: String = "ઓલરાઉન્ડર અને કેપ્ટન (Captain & All-rounder)",
+    val title: String = "All-rounder & Captain",
     val phone: String = "8980294520",
     val city: String = "Naliya (Kutch)",
+    val jerseyNumber: Int = 7,
     val photoUri: String? = null,
     val avatarPreset: Int = 0,
     val matches: Int = 34,
@@ -351,6 +354,98 @@ data class UserProfile(
             catches = 0,
             result = "Lost by 12 runs"
         )
-    )
+    ),
+    val badges: List<DigitalBadge> = emptyList()
+)
+
+data class NotificationPreferences(
+    val liveScoreAlerts: Boolean = true,
+    val boundaryAlerts: Boolean = true,
+    val wicketAlerts: Boolean = true,
+    val soundAndVibration: Boolean = true,
+    val matchReminders: Boolean = true
+)
+
+// 1. Digital Badges & Honours System (Requirement)
+data class DigitalBadge(
+    val id: String,
+    val title: String,
+    val titleGujarati: String = "",
+    val description: String,
+    val category: String = "Batting", // Batting, Bowling, Fielding, Special
+    val iconSymbol: String = "🏏",
+    val badgeColor: Long = 0xFFF59E0B, // Gold, Emerald, Violet, Rose
+    val dateUnlocked: String = "Active",
+    val isUnlocked: Boolean = true
+)
+
+// 2. 100% Free Local Fantasy League Models (Requirement)
+data class FantasyPlayer(
+    val player: Player,
+    val fantasyRole: String, // "WK", "BAT", "AR", "BOWL"
+    val teamName: String,
+    val isCaptain: Boolean = false, // 2x points
+    val isViceCaptain: Boolean = false, // 1.5x points
+    val fantasyPoints: Int = 0
+)
+
+data class FantasyTeam(
+    val teamName: String = "My Grassroots XI",
+    val selectedPlayerIds: Set<String> = emptySet(),
+    val captainId: String? = null,
+    val viceCaptainId: String? = null,
+    val totalPoints: Int = 0
+)
+
+data class FantasyLeaderboardEntry(
+    val rank: Int,
+    val userName: String,
+    val teamName: String,
+    val captainName: String,
+    val points: Int,
+    val isCurrentUser: Boolean = false
+)
+
+// 3. Player Marketplace / Urgent Finder Models (Requirement)
+data class PlayerRequirement(
+    val id: String,
+    val teamName: String,
+    val roleNeeded: String, // Fast Bowler, Spin Bowler, Wicketkeeper, Top-Order Batsman, All-rounder
+    val matchDate: String,
+    val groundCity: String,
+    val oversType: String = "20 Overs Match",
+    val contactPhone: String,
+    val urgent: Boolean = true,
+    val postedBy: String = "Team Captain",
+    val applicantsCount: Int = 0,
+    val isApplied: Boolean = false,
+    val timeAgo: String = "Just now"
+)
+
+// 4. Auto-Text Commentary Models (Requirement)
+data class CommentaryItem(
+    val id: String,
+    val overText: String, // e.g. "14.2"
+    val headline: String,
+    val commentaryGujarati: String,
+    val commentaryHindi: String,
+    val commentaryEnglish: String,
+    val bowlerName: String,
+    val batsmanName: String,
+    val runs: Int,
+    val isWicket: Boolean = false,
+    val isBoundary: Boolean = false,
+    val isSix: Boolean = false,
+    val timestamp: String = "Live"
+)
+
+// 5. Offline Scoring Event Model (Requirement)
+data class OfflineScoringEvent(
+    val id: String,
+    val matchId: String,
+    val type: String, // "RUNS", "EXTRA", "WICKET"
+    val description: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isSynced: Boolean = false
 )
 

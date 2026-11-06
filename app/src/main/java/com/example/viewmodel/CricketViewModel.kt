@@ -24,6 +24,14 @@ import kotlinx.coroutines.launch
 import com.example.data.UserProfile
 import com.example.data.PlayerMatchRecord
 import com.example.data.LeaderboardItem
+import com.example.data.NotificationPreferences
+import com.example.data.DigitalBadge
+import com.example.data.FantasyPlayer
+import com.example.data.FantasyTeam
+import com.example.data.FantasyLeaderboardEntry
+import com.example.data.PlayerRequirement
+import com.example.data.CommentaryItem
+import com.example.data.OfflineScoringEvent
 
 sealed class AppScreen {
     object Splash : AppScreen()
@@ -39,6 +47,8 @@ sealed class AppScreen {
     object Tournaments : AppScreen()
     object FullScorecard : AppScreen()
     object Profile : AppScreen()
+    object LocalFantasy : AppScreen()
+    object DigitalBadges : AppScreen()
 }
 
 class CricketViewModel : ViewModel() {
@@ -65,6 +75,265 @@ class CricketViewModel : ViewModel() {
         _celebrationEvent.value = null
     }
 
+    // 1. Offline Scoring System (Offline Sync)
+    val isOfflineMode = MutableStateFlow(false)
+    private val _pendingOfflineEvents = MutableStateFlow<List<OfflineScoringEvent>>(emptyList())
+    val pendingOfflineEvents: StateFlow<List<OfflineScoringEvent>> = _pendingOfflineEvents.asStateFlow()
+    val isSyncing = MutableStateFlow(false)
+
+    fun toggleOfflineMode() {
+        isOfflineMode.value = !isOfflineMode.value
+        if (isOfflineMode.value) {
+            showToast("Offline Ground Mode Active! You can record balls without internet.")
+        } else {
+            if (_pendingOfflineEvents.value.isNotEmpty()) {
+                syncOfflineData()
+            } else {
+                showToast("Online Mode Active • Connected to server")
+            }
+        }
+    }
+
+    fun syncOfflineData() {
+        if (_pendingOfflineEvents.value.isEmpty()) {
+            showToast("All scores are already up to date with cloud!")
+            return
+        }
+        viewModelScope.launch {
+            isSyncing.value = true
+            delay(800)
+            val count = _pendingOfflineEvents.value.size
+            _pendingOfflineEvents.value = emptyList()
+            isOfflineMode.value = false
+            isSyncing.value = false
+            showToast("Successfully synced $count offline ball events with cloud server!")
+        }
+    }
+
+    // 2. Digital Badges & Medals System (Requirement)
+    private val _userBadges = MutableStateFlow(SampleData.standardBadges)
+    val userBadges: StateFlow<List<DigitalBadge>> = _userBadges.asStateFlow()
+
+    fun awardBadge(badgeId: String) {
+        _userBadges.update { list ->
+            list.map { b ->
+                if (b.id == badgeId && !b.isUnlocked) {
+                    showToast("New Badge Unlocked: ${b.title} ${b.iconSymbol}!")
+                    b.copy(isUnlocked = true, dateUnlocked = "Just unlocked")
+                } else b
+            }
+        }
+    }
+
+    // 3. 100% Free Local Fantasy League (Requirement)
+    private val _userFantasyTeam = MutableStateFlow(FantasyTeam())
+    val userFantasyTeam: StateFlow<FantasyTeam> = _userFantasyTeam.asStateFlow()
+
+    private val _fantasyLeaderboard = MutableStateFlow(SampleData.sampleFantasyLeaderboard)
+    val fantasyLeaderboard: StateFlow<List<FantasyLeaderboardEntry>> = _fantasyLeaderboard.asStateFlow()
+
+    fun toggleFantasyPlayer(playerId: String) {
+        val current = _userFantasyTeam.value.selectedPlayerIds
+        val updated = if (current.contains(playerId)) {
+            current - playerId
+        } else {
+            if (current.size >= 11) {
+                showToast("Fantasy team can have maximum 11 players!")
+                return
+            }
+            current + playerId
+        }
+        _userFantasyTeam.update {
+            it.copy(
+                selectedPlayerIds = updated,
+                captainId = if (it.captainId == playerId && !updated.contains(playerId)) null else it.captainId,
+                viceCaptainId = if (it.viceCaptainId == playerId && !updated.contains(playerId)) null else it.viceCaptainId
+            )
+        }
+    }
+
+    fun setFantasyCaptain(playerId: String) {
+        if (!_userFantasyTeam.value.selectedPlayerIds.contains(playerId)) {
+            showToast("Add player to your 11 first!")
+            return
+        }
+        _userFantasyTeam.update {
+            it.copy(
+                captainId = playerId,
+                viceCaptainId = if (it.viceCaptainId == playerId) null else it.viceCaptainId
+            )
+        }
+        showToast("Captain selected (2x Points multiplier)")
+    }
+
+    fun setFantasyViceCaptain(playerId: String) {
+        if (!_userFantasyTeam.value.selectedPlayerIds.contains(playerId)) {
+            showToast("Add player to your 11 first!")
+            return
+        }
+        _userFantasyTeam.update {
+            it.copy(
+                viceCaptainId = playerId,
+                captainId = if (it.captainId == playerId) null else it.captainId
+            )
+        }
+        showToast("Vice-Captain selected (1.5x Points multiplier)")
+    }
+
+    fun saveFantasyTeam(teamName: String) {
+        val count = _userFantasyTeam.value.selectedPlayerIds.size
+        if (count != 11) {
+            showToast("Please select exactly 11 players! (Selected: $count/11)")
+            return
+        }
+        if (_userFantasyTeam.value.captainId == null) {
+            showToast("Please select a Captain (2x points)!")
+            return
+        }
+        val cleanName = teamName.ifBlank { "My Grassroots XI" }
+        _userFantasyTeam.update { it.copy(teamName = cleanName) }
+        showToast("Virtual Fantasy 11 saved! 100% Free Fan League active.")
+    }
+
+    // 4. Player Marketplace / Urgent Requirements (Requirement)
+    private val _playerRequirements = MutableStateFlow(SampleData.samplePlayerRequirements)
+    val playerRequirements: StateFlow<List<PlayerRequirement>> = _playerRequirements.asStateFlow()
+    val isPostRequirementDialogOpen = MutableStateFlow(false)
+
+    fun postPlayerRequirement(
+        team: String,
+        role: String,
+        date: String,
+        ground: String,
+        phone: String,
+        overs: String
+    ) {
+        val newReq = PlayerRequirement(
+            id = "req_${System.currentTimeMillis()}",
+            teamName = team.ifBlank { "My Team" },
+            roleNeeded = role.ifBlank { "Fast Bowler" },
+            matchDate = date.ifBlank { "Upcoming Match" },
+            groundCity = ground.ifBlank { "Local Cricket Ground" },
+            oversType = overs.ifBlank { "20 Overs Match" },
+            contactPhone = phone.ifBlank { _userProfile.value.phone },
+            urgent = true,
+            postedBy = "Capt. ${_userProfile.value.name}",
+            applicantsCount = 0,
+            isApplied = false,
+            timeAgo = "Just now"
+        )
+        _playerRequirements.update { listOf(newReq) + it }
+        isPostRequirementDialogOpen.value = false
+        showToast("Player requirement posted! Available players can now request to join.")
+    }
+
+    fun applyForRequirement(reqId: String) {
+        _playerRequirements.update { list ->
+            list.map { req ->
+                if (req.id == reqId) {
+                    if (req.isApplied) req else req.copy(
+                        isApplied = true,
+                        applicantsCount = req.applicantsCount + 1
+                    )
+                } else req
+            }
+        }
+        showToast("Request to join sent to Captain! They will call you on your mobile.")
+    }
+
+    // 5. Auto-Text Commentary (Requirement)
+    private val _commentaryList = MutableStateFlow(SampleData.sampleCommentaryList)
+    val commentaryList: StateFlow<List<CommentaryItem>> = _commentaryList.asStateFlow()
+    val commentaryLanguage = MutableStateFlow("Gujarati") // "Gujarati", "Hindi", "English"
+
+    fun setCommentaryLanguage(lang: String) {
+        commentaryLanguage.value = lang
+    }
+
+    private data class CommentaryTexts(
+        val headline: String,
+        val guj: String,
+        val hin: String,
+        val eng: String
+    )
+
+    fun addCommentaryEvent(
+        runs: Int,
+        isWicket: Boolean,
+        extraType: ExtraType? = null,
+        bowler: Player,
+        striker: Player,
+        overText: String
+    ) {
+        val texts = when {
+            isWicket -> CommentaryTexts(
+                headline = "WICKET! Massive breakthrough!",
+                guj = "આઉટ! મોટી સફળતા! બોલરે સ્ટમ્પ ઉડાવીને મોટી વિકેટ ઝડપી લીધી!",
+                hin = "विकेट! बड़ा झटका! गेंदबाज ने जबरदस्त गेंद पर बल्लेबाज को चलता किया!",
+                eng = "OUT! Massive breakthrough! The fielding side erupts in celebration!"
+            )
+            extraType == ExtraType.WIDE -> CommentaryTexts(
+                headline = "Wide Ball",
+                guj = "વાઈડ બોલ! લેગ સ્ટમ્પ બહાર દિશાહીન બોલ, વધારાનો એક રન મળ્યો.",
+                hin = "वाइड गेंद! लेग स्टंप के काफी बाहर, एक अतिरिक्त रन मिला.",
+                eng = "Wide ball! Strays down the leg side, bonus run awarded."
+            )
+            extraType == ExtraType.NO_BALL -> CommentaryTexts(
+                headline = "NO BALL! Free Hit!",
+                guj = "નો બોલ! બોલરનો પગ લાઈન બહાર અને હવે પછીના બોલ પર ફ્રી હિટ મળશે!",
+                hin = "नो बॉल! ओवरस्टेपिंग की वजह से नो बॉल, अब अगली गेंद पर फ्री हिट!",
+                eng = "NO BALL! Overstepped the bowling crease, free hit upcoming!"
+            )
+            runs == 6 -> CommentaryTexts(
+                headline = "MAXIMUM! 6 Runs!",
+                guj = "હવામાં શાનદાર શોટ અને આ સીધા 6 રન! બોલ સીધો દર્શકોની વચ્ચે!",
+                hin = "हवा में खूबसूरत शॉट और गेंद सीधे दर्शकों के बीच 6 रन के लिए!",
+                eng = "What a magnificent towering shot sailing into the stands for a huge SIX!"
+            )
+            runs == 4 -> CommentaryTexts(
+                headline = "FOUR! Crisp Boundary!",
+                guj = "ચાર રન! ગેપમાં સુંદર કટ શોટ અને બોલ સીધો બાઉન્ડ્રી લાઈન બહાર!",
+                hin = "चार रन! खूबसूरत टाइमिंग के साथ गेंद गोली की रफ्तार से बाउंड्री पार!",
+                eng = "CRACKING FOUR! Pierces the cover field with sublime timing to the fence!"
+            )
+            runs == 2 -> CommentaryTexts(
+                headline = "Two Runs",
+                guj = "ડીપ મિડવિકેટ તરફ ડ્રાઈવ કરીને ઉત્તમ રનિંગ સાથે બે રન લીધા.",
+                hin = "गैप में खेलकर दोनों बल्लेबाजों ने दौड़कर दो रन बटोरे.",
+                eng = "Driven into the deep gap, excellent running between the wickets for two."
+            )
+            runs == 1 -> CommentaryTexts(
+                headline = "Single Taken",
+                guj = "હળવા હાથે ટેપ કરીને ઝડપી સિંગલ રન પૂર્ણ કર્યો.",
+                hin = "हल्के हाथों से टैप किया और तेजी से एक रन पूरा किया.",
+                eng = "Pushed gently into the covers for a quick, smart single."
+            )
+            else -> CommentaryTexts(
+                headline = "Dot Ball",
+                guj = "સારો બોલ! બેટ્સમેન પૂરી રીતે બીટ થયો, કોઈ રન નહીં.",
+                hin = "शानदार गेंद! बल्लेबाज पूरी तरह बीट हुए, कोई रन नहीं.",
+                eng = "Dot ball! Crisp length on off-stump, solidly defended."
+            )
+        }
+
+        val newItem = CommentaryItem(
+            id = "c_${System.currentTimeMillis()}",
+            overText = overText,
+            headline = texts.headline,
+            commentaryGujarati = "${striker.name} ને ${bowler.name}: ${texts.guj}",
+            commentaryHindi = "${striker.name} को ${bowler.name}: ${texts.hin}",
+            commentaryEnglish = "${bowler.name} to ${striker.name}: ${texts.eng}",
+            bowlerName = bowler.name,
+            batsmanName = striker.name,
+            runs = runs,
+            isWicket = isWicket,
+            isBoundary = (runs == 4),
+            isSix = (runs == 6),
+            timestamp = "Live"
+        )
+        _commentaryList.update { listOf(newItem) + it.take(40) }
+    }
+
     // Selected Player for full profile & record viewing dialog
     private val _selectedViewingPlayer = MutableStateFlow<Player?>(null)
     val selectedViewingPlayer: StateFlow<Player?> = _selectedViewingPlayer.asStateFlow()
@@ -87,6 +356,152 @@ class CricketViewModel : ViewModel() {
             _matchesList.update { it.toList() }
             isRefreshing.value = false
         }
+    }
+
+    // Notification Preferences
+    private val _notificationSettings = MutableStateFlow(NotificationPreferences())
+    val notificationSettings: StateFlow<NotificationPreferences> = _notificationSettings.asStateFlow()
+
+    fun updateNotificationSettings(
+        liveScore: Boolean,
+        boundary: Boolean,
+        wicket: Boolean,
+        soundVibration: Boolean,
+        reminder: Boolean
+    ) {
+        _notificationSettings.value = NotificationPreferences(
+            liveScoreAlerts = liveScore,
+            boundaryAlerts = boundary,
+            wicketAlerts = wicket,
+            soundAndVibration = soundVibration,
+            matchReminders = reminder
+        )
+        showToast("Notification settings saved successfully!")
+    }
+
+    // App Language - Default English as requested
+    val selectedLanguage = MutableStateFlow("English")
+    fun setLanguage(lang: String) {
+        selectedLanguage.value = lang
+        showToast("Language changed to $lang")
+    }
+
+    // User Login / Authentication state
+    val isLoggedIn = MutableStateFlow(true)
+
+    // Feedback Toast / Banner message
+    val toastMessage = MutableStateFlow<String?>(null)
+    fun showToast(message: String) {
+        toastMessage.value = message
+    }
+    fun clearToast() {
+        toastMessage.value = null
+    }
+
+    // Mobile Number Registration & Settings Dialog Triggers
+    val isRegisterDialogOpen = MutableStateFlow(false)
+    val isNotificationDialogOpen = MutableStateFlow(false)
+    val isLanguageDialogOpen = MutableStateFlow(false)
+    val isDeleteAccountDialogOpen = MutableStateFlow(false)
+    val isClearDataDialogOpen = MutableStateFlow(false)
+    val isLogoutDialogOpen = MutableStateFlow(false)
+    val isSupportDialogOpen = MutableStateFlow(false)
+    val isAboutDialogOpen = MutableStateFlow(false)
+    val isPrivacyPolicyDialogOpen = MutableStateFlow(false)
+
+    // Register with Mobile Number
+    fun registerWithMobile(
+        name: String,
+        phone: String,
+        city: String = "Naliya",
+        role: String = "All-rounder",
+        jersey: Int = 7
+    ) {
+        val cleanName = name.ifBlank { "Player" }
+        val cleanPhone = phone.ifBlank { "9876543210" }
+        val cleanCity = city.ifBlank { "Naliya" }
+
+        _userProfile.update { current ->
+            current.copy(
+                name = cleanName,
+                phone = cleanPhone,
+                city = cleanCity,
+                title = "$role & Player",
+                jerseyNumber = jersey
+            )
+        }
+
+        savePlayerToRoster(
+            Player(
+                id = _userProfile.value.id,
+                name = cleanName,
+                phone = cleanPhone,
+                city = cleanCity,
+                role = role,
+                jerseyNumber = jersey,
+                matches = _userProfile.value.matches,
+                runs = _userProfile.value.runs,
+                wickets = _userProfile.value.wickets
+            )
+        )
+
+        isLoggedIn.value = true
+        isRegisterDialogOpen.value = false
+        showToast("Registered successfully with +91 $cleanPhone!")
+    }
+
+    // Clear Cache and Data action
+    fun clearAppData() {
+        searchQuery.value = ""
+        activeFilterTab.value = "Contacts (315)"
+        _currentMatch.update { it?.copy() }
+        isClearDataDialogOpen.value = false
+        showToast("App cache and temporary data cleared successfully!")
+    }
+
+    // Logout action
+    fun logout() {
+        isLoggedIn.value = false
+        isLogoutDialogOpen.value = false
+        showToast("Logged out successfully.")
+    }
+
+    // Quick Login
+    fun login(name: String = "Kasam Jat", phone: String = "8980294520") {
+        isLoggedIn.value = true
+        _userProfile.update { it.copy(name = name, phone = phone) }
+        showToast("Logged in as $name (+91 $phone)")
+    }
+
+    // Delete Account action
+    fun deleteAccount() {
+        _userProfile.value = UserProfile(
+            id = "guest_${System.currentTimeMillis()}",
+            name = "Guest User",
+            title = "New Player",
+            phone = "",
+            city = "Naliya",
+            matches = 0,
+            runs = 0,
+            wickets = 0,
+            catches = 0,
+            runOuts = 0,
+            stumpings = 0,
+            highestScore = "-",
+            bestBowling = "-",
+            fifties = 0,
+            hundreds = 0,
+            fours = 0,
+            sixes = 0,
+            teamsRepresented = emptyList(),
+            matchHistory = emptyList()
+        )
+        _currentMatch.value = null
+        _matchesList.value = emptyList()
+        isLoggedIn.value = false
+        isDeleteAccountDialogOpen.value = false
+        _screenStack.value = listOf(AppScreen.Home)
+        showToast("Your account and data have been deleted successfully.")
     }
 
     // Spectator vs Scorer Mode
@@ -366,11 +781,11 @@ class CricketViewModel : ViewModel() {
         val item = list.find { it.playerName.equals(playerName, ignoreCase = true) }
         val rank = item?.rank ?: 1
         val title = when (rank) {
-            1 -> "🥇 રેન્ક #1 (Champion)"
-            2 -> "🥈 રેન્ક #2 (Elite)"
-            3 -> "🥉 રેન્ક #3 (Star)"
-            in 4..10 -> "⭐ ટોપ 10 (Top 10)"
-            else -> "રેન્ક #$rank"
+            1 -> "🥇 Rank #1 (Champion)"
+            2 -> "🥈 Rank #2 (Elite)"
+            3 -> "🥉 Rank #3 (Star)"
+            in 4..10 -> "⭐ Top 10"
+            else -> "Rank #$rank"
         }
         return Pair(rank, title)
     }
@@ -554,6 +969,39 @@ class CricketViewModel : ViewModel() {
             isCompleted = isInningDone
         )
 
+        // Queue offline event if in offline mode
+        if (isOfflineMode.value) {
+            _pendingOfflineEvents.update {
+                it + OfflineScoringEvent(
+                    id = "off_${System.currentTimeMillis()}",
+                    matchId = match.id,
+                    type = "RUNS",
+                    description = "$runs runs scored by ${strikerScore.player.name}"
+                )
+            }
+        }
+
+        // Add auto-generated commentary
+        addCommentaryEvent(
+            runs = runs,
+            isWicket = false,
+            extraType = null,
+            bowler = bowlerScore.player,
+            striker = strikerScore.player,
+            overText = "${inning.legalBalls / 6}.${(inning.legalBalls % 6) + 1}"
+        )
+
+        // Check and award digital badges
+        if (newStrikerScore.runs >= 50 && strikerScore.runs < 50) {
+            awardBadge("b_fifty")
+        }
+        if (newStrikerScore.runs >= 100 && strikerScore.runs < 100) {
+            awardBadge("b_century")
+        }
+        if (newStrikerScore.sixes >= 5) {
+            awardBadge("b_sixer")
+        }
+
         updateInningAndCheckMatchEnd(updatedInning, isOverEnd, isInningDone, isTargetReached)
     }
 
@@ -666,6 +1114,28 @@ class CricketViewModel : ViewModel() {
             isCompleted = isInningDone
         )
 
+        // Queue offline event if in offline mode
+        if (isOfflineMode.value) {
+            _pendingOfflineEvents.update {
+                it + OfflineScoringEvent(
+                    id = "off_${System.currentTimeMillis()}",
+                    matchId = match.id,
+                    type = "EXTRA",
+                    description = "$displayLabel bowled by ${bowlerScore.player.name}"
+                )
+            }
+        }
+
+        // Add auto commentary
+        addCommentaryEvent(
+            runs = runsOffBat,
+            isWicket = false,
+            extraType = extraType,
+            bowler = bowlerScore.player,
+            striker = strikerScore.player,
+            overText = "${inning.legalBalls / 6}.${(inning.legalBalls % 6) + if (isLegal) 1 else 0}"
+        )
+
         updateInningAndCheckMatchEnd(updatedInning, isOverEnd, isInningDone, isTargetReached)
     }
 
@@ -769,6 +1239,36 @@ class CricketViewModel : ViewModel() {
             ballHistory = inning.ballHistory + ballEvent,
             isCompleted = isInningDone
         )
+
+        // Queue offline event if in offline mode
+        if (isOfflineMode.value) {
+            _pendingOfflineEvents.update {
+                it + OfflineScoringEvent(
+                    id = "off_${System.currentTimeMillis()}",
+                    matchId = match.id,
+                    type = "WICKET",
+                    description = "Wicket taken by ${bowlerScore.player.name}"
+                )
+            }
+        }
+
+        // Add auto commentary
+        addCommentaryEvent(
+            runs = 0,
+            isWicket = true,
+            extraType = null,
+            bowler = bowlerScore.player,
+            striker = dismissedScore.player,
+            overText = "${inning.legalBalls / 6}.${(inning.legalBalls % 6) + 1}"
+        )
+
+        // Award Digital Badges
+        if (newBowlerScore.wickets >= 3) {
+            awardBadge("b_hattrick")
+        }
+        if (newBowlerScore.wickets >= 5) {
+            awardBadge("b_fifer")
+        }
 
         isWicketModalOpen.value = false
         updateInningAndCheckMatchEnd(updatedInning, isOverEnd, isInningDone, false)

@@ -124,7 +124,7 @@ fun ProfileScreen(
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "ક્રિકેટ પ્રોફાઇલ (Cricket Profile)",
+                        text = "Cricket Profile",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = MaterialTheme.colorScheme.onSurface
@@ -207,7 +207,7 @@ fun ProfileScreen(
                     ) {
                         Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(14.dp), tint = CricTeal)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("ફોટો બદલો (Change Photo)", fontSize = 11.sp, color = CricTeal, fontWeight = FontWeight.Bold)
+                        Text("Change Photo", fontSize = 11.sp, color = CricTeal, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -262,7 +262,7 @@ fun ProfileScreen(
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("પ્રોફાઇલ એડિટ કરો (Edit Profile)", fontWeight = FontWeight.Bold)
+                        Text("Edit Profile", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -271,7 +271,7 @@ fun ProfileScreen(
 
             // Main Career Stats Banner: Matches, Total Runs, Wickets (Exact user requirement)
             Text(
-                text = "કારકિર્દી આંકડા (Career Record)",
+                text = "Career Record",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -283,22 +283,22 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 ProfileStatCard(
-                    title = "કુલ મેચ",
-                    subtitle = "Matches",
+                    title = "Matches",
+                    subtitle = "Played",
                     value = "${userProfile.matches}",
                     color = CricTeal,
                     modifier = Modifier.weight(1f)
                 )
                 ProfileStatCard(
-                    title = "ટોટલ સ્કોર",
-                    subtitle = "Runs",
+                    title = "Total Runs",
+                    subtitle = "Career Runs",
                     value = "${userProfile.runs}",
                     color = CricSecondary,
                     modifier = Modifier.weight(1f)
                 )
                 ProfileStatCard(
-                    title = "કુલ વિકેટ",
-                    subtitle = "Wickets",
+                    title = "Total Wickets",
+                    subtitle = "Career Wkts",
                     value = "${userProfile.wickets}",
                     color = CricGold,
                     modifier = Modifier.weight(1f)
@@ -307,17 +307,15 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Sub-Navigation Tabs: Batting, Bowling, Fielding, Score History, Teams, Leaderboard (Item 12)
+            // Sub-Navigation Tabs: Batting, Bowling, Fielding, Score History, Teams, Leaderboard
             var selectedTab by remember { androidx.compose.runtime.mutableIntStateOf(0) }
             val tabTitles = listOf(
-                "બેટિંગ (Batting)",
-                "બોલિંગ (Bowling)",
-                "ફિલ્ડિંગ (Fielding)",
-                "સ્કોર હિસ્ટ્રી (History)",
-                "ટીમો (Teams)",
-                "લીડરબોર્ડ (Leaderboard)"
+                "Batting",
+                "Bowling",
+                "Fielding",
+                "History",
+                "Teams",
+                "Leaderboard"
             )
 
             ScrollableTabRow(
@@ -365,7 +363,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(Icons.Default.SportsCricket, contentDescription = null, tint = CricTeal, modifier = Modifier.size(22.dp))
-                                Text("બેટિંગ રેકોર્ડ (Batting Career Record)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("Batting Career Record", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -373,25 +371,25 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                ProfileMiniMetric("કુલ રન (Runs)", "${userProfile.runs}")
-                                ProfileMiniMetric("મેચ (Matches)", "${userProfile.matches}")
-                                ProfileMiniMetric("સર્વોચ્ચ (HS)", userProfile.highestScore)
+                                ProfileMiniMetric("Total Runs", "${userProfile.runs}")
+                                ProfileMiniMetric("Matches", "${userProfile.matches}")
+                                ProfileMiniMetric("Highest Score", userProfile.highestScore)
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                ProfileMiniMetric("સ્ટ્રાઇક રેટ (SR)", String.format("%.1f", userProfile.strikeRate))
-                                ProfileMiniMetric("સરેરાશ (Avg)", String.format("%.1f", userProfile.battingAvg))
+                                ProfileMiniMetric("Strike Rate", String.format("%.1f", userProfile.strikeRate))
+                                ProfileMiniMetric("Average", String.format("%.1f", userProfile.battingAvg))
                                 ProfileMiniMetric("50s / 100s", "${userProfile.fifties} / ${userProfile.hundreds}")
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                ProfileMiniMetric("ચોગ્ગા (4s)", "${userProfile.fours}")
-                                ProfileMiniMetric("છગ્ગા (6s)", "${userProfile.sixes}")
-                                ProfileMiniMetric("બેટિંગ શૈલી", "Right-hand bat")
+                                ProfileMiniMetric("Fours (4s)", "${userProfile.fours}")
+                                ProfileMiniMetric("Sixes (6s)", "${userProfile.sixes}")
+                                ProfileMiniMetric("Batting Style", "Right-hand bat")
                             }
                         }
                     }
@@ -413,7 +411,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(Icons.Default.Shield, contentDescription = null, tint = CricGold, modifier = Modifier.size(22.dp))
-                                Text("બોલિંગ રેકોર્ડ (Bowling Career Record)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("Bowling Career Record", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -421,17 +419,17 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                ProfileMiniMetric("કુલ વિકેટ", "${userProfile.wickets}")
-                                ProfileMiniMetric("શ્રેષ્ઠ બોલિંગ", userProfile.bestBowling)
-                                ProfileMiniMetric("ઇકોનોમી (Eco)", String.format("%.1f", userProfile.bowlingEconomy))
+                                ProfileMiniMetric("Wickets", "${userProfile.wickets}")
+                                ProfileMiniMetric("Best Bowling", userProfile.bestBowling)
+                                ProfileMiniMetric("Economy", String.format("%.1f", userProfile.bowlingEconomy))
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                ProfileMiniMetric("ઓવર્સ (Overs)", String.format("%.1f", userProfile.wickets * 2.8))
-                                ProfileMiniMetric("સરેરાશ (Avg)", String.format("%.1f", 16.4f))
-                                ProfileMiniMetric("સ્ટ્રાઇક રેટ", String.format("%.1f", 14.8f))
+                                ProfileMiniMetric("Overs", String.format("%.1f", userProfile.wickets * 2.8))
+                                ProfileMiniMetric("Average", String.format("%.1f", 16.4f))
+                                ProfileMiniMetric("Strike Rate", String.format("%.1f", 14.8f))
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
@@ -439,7 +437,7 @@ fun ProfileScreen(
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 ProfileMiniMetric("3-Wkt Hauls", "6")
                                 ProfileMiniMetric("5-Wkt Hauls", "1")
-                                ProfileMiniMetric("બોલિંગ શૈલી", "Right-arm medium")
+                                ProfileMiniMetric("Bowling Style", "Right-arm medium")
                             }
                         }
                     }
@@ -461,7 +459,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text("🧤", fontSize = 22.sp)
-                                Text("ફિલ્ડિંગ રેકોર્ડ (Fielding Career Record)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("Fielding Career Record", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -469,9 +467,9 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                ProfileMiniMetric("કુલ કેચ (Catches)", "${userProfile.catches}")
-                                ProfileMiniMetric("રન આઉટ (Run Outs)", "${userProfile.runOuts}")
-                                ProfileMiniMetric("સ્ટમ્પિંગ (Stumpings)", "${userProfile.stumpings}")
+                                ProfileMiniMetric("Catches", "${userProfile.catches}")
+                                ProfileMiniMetric("Run Outs", "${userProfile.runOuts}")
+                                ProfileMiniMetric("Stumpings", "${userProfile.stumpings}")
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -488,8 +486,8 @@ fun ProfileScreen(
                                     Icon(Icons.Default.CheckCircle, contentDescription = null, tint = CricTeal, modifier = Modifier.size(20.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Column {
-                                        Text("ફિલ્ડિંગ ઇમ્પેક્ટ રેટિંગ: ઉત્કૃષ્ટ (A+)", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = CricTeal)
-                                        Text("પ્રતિ મેચ સરેરાશ 0.85 કેચ અને ડાયરેક્ટ હિટ રન આઉટ", fontSize = 11.sp, color = CricTextSecondary)
+                                        Text("Fielding Impact Rating: Elite (A+)", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = CricTeal)
+                                        Text("Avg 0.85 catches per match & direct hit run-outs", fontSize = 11.sp, color = CricTextSecondary)
                                     }
                                 }
                             }
@@ -504,7 +502,7 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = "ટોટલ સ્કોર હિસ્ટ્રી (Match-by-Match History):",
+                            text = "Match-by-Match History:",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
@@ -522,8 +520,8 @@ fun ProfileScreen(
                                 ) {
                                     Text("🏏", fontSize = 32.sp)
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text("હજી સુધી કોઈ મેચ હિસ્ટ્રી નથી", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                    Text("લાઈવ મેચ પૂર્ણ થયા પછી સ્કોર હિસ્ટ્રી આપોઆપ અહીં ઉમેરાશે.", fontSize = 12.sp, color = CricTextSecondary)
+                                    Text("No match history recorded yet", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    Text("Match scores will appear here automatically after completing live matches.", fontSize = 12.sp, color = CricTextSecondary)
                                 }
                             }
                         } else {
@@ -541,7 +539,7 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = "રમેલી ટીમોની વિગતો (${userProfile.teamsRepresented.size} ટીમો):",
+                            text = "Teams Represented (${userProfile.teamsRepresented.size} Teams):",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
@@ -572,7 +570,7 @@ fun ProfileScreen(
                                         Spacer(modifier = Modifier.width(12.dp))
                                         Column {
                                             Text(teamName, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                            Text(if (idx == 0) "કેપ્ટન અને ઓલરાઉન્ડર • જર્સી #7" else "ઓલરાઉન્ડર • જર્સી #7", fontSize = 12.sp, color = CricTextSecondary)
+                                            Text(if (idx == 0) "Captain & All-rounder • Jersey #7" else "All-rounder • Jersey #7", fontSize = 12.sp, color = CricTextSecondary)
                                         }
                                     }
 
@@ -581,7 +579,7 @@ fun ProfileScreen(
                                         shape = RoundedCornerShape(8.dp)
                                     ) {
                                         Text(
-                                            text = "${(userProfile.matches / (idx + 1)).coerceAtLeast(1)} મેચ",
+                                            text = "${(userProfile.matches / (idx + 1)).coerceAtLeast(1)} Matches",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = CricTextPrimary,
@@ -615,7 +613,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("તમારો લીડરબોર્ડ રેન્ક (Your Rank):", color = Color(0xFF94A3B8), fontSize = 12.sp)
+                                    Text("Your Leaderboard Rank:", color = Color(0xFF94A3B8), fontSize = 12.sp)
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = currentRankInfo.second,
@@ -623,7 +621,7 @@ fun ProfileScreen(
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 18.sp
                                     )
-                                    Text("Quick Heroes 11 લીડરબોર્ડ", color = Color(0xFFE2E8F0), fontSize = 11.sp)
+                                    Text("Quick Heroes 11 Leaderboard", color = Color(0xFFE2E8F0), fontSize = 11.sp)
                                 }
                                 Box(
                                     modifier = Modifier
@@ -644,9 +642,9 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             listOf(
-                                "Batting" to "🏏 બેટિંગ (Runs)",
-                                "Bowling" to "⚡ બોલિંગ (Wickets)",
-                                "Fielding" to "🧤 ફિલ્ડિંગ (Catches)"
+                                "Batting" to "🏏 Batting (Runs)",
+                                "Bowling" to "⚡ Bowling (Wickets)",
+                                "Fielding" to "🧤 Fielding (Catches)"
                             ).forEach { (catKey, catLabel) ->
                                 val isSel = (leaderboardCategory == catKey)
                                 Surface(
@@ -706,9 +704,9 @@ fun ProfileScreen(
                         Icon(Icons.Default.CheckCircle, contentDescription = null, tint = CricGold, modifier = Modifier.size(26.dp))
                     }
                     Column {
-                        Text("QUICK HEROES 11 વેરીફાઇડ ખેલાડી", color = CricGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("QUICK HEROES 11 Verified Player", color = CricGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text("100% મફત લાઈવ સ્કોરિંગ અને મેચ મેનેજમેન્ટ", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        Text("100% Free Live Scoring & Match Management", color = Color(0xFF94A3B8), fontSize = 11.sp)
                     }
                 }
             }
@@ -720,11 +718,11 @@ fun ProfileScreen(
         AlertDialog(
             onDismissRequest = { isPhotoPickerChoiceOpen = false },
             title = {
-                Text("પ્રોફાઇલ ફોટો પસંદ કરો (Choose Photo)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Choose Profile Photo", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("તમારી ગેલેરીમાંથી ફોટો અપલોડ કરો અથવા ક્રિકેટ અવતાર પસંદ કરો:", fontSize = 13.sp, color = CricTextSecondary)
+                    Text("Upload a photo from your gallery or choose a cricket avatar:", fontSize = 13.sp, color = CricTextSecondary)
 
                     // Option 1: Pick from device gallery
                     Button(
@@ -740,10 +738,10 @@ fun ProfileScreen(
                     ) {
                         Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("ગેલેરીમાંથી ફોટો પસંદ કરો (Pick from Gallery)")
+                        Text("Pick from Gallery")
                     }
 
-                    Text("અથવા ક્રિકેટ અવતાર પસંદ કરો:", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Or select a cricket avatar:", fontSize = 12.sp, fontWeight = FontWeight.Bold)
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -777,7 +775,7 @@ fun ProfileScreen(
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("ફોટો હટાવો (Remove Photo)")
+                            Text("Remove Photo")
                         }
                     }
                 }
@@ -785,7 +783,7 @@ fun ProfileScreen(
             confirmButton = {},
             dismissButton = {
                 OutlinedButton(onClick = { isPhotoPickerChoiceOpen = false }) {
-                    Text("બંધ કરો (Close)")
+                    Text("Close")
                 }
             }
         )
@@ -898,7 +896,7 @@ fun EditProfileModal(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("પ્રોફાઇલ માહિતી સુધારો (Edit Profile)", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Text("Edit Profile Details", fontWeight = FontWeight.Bold, fontSize = 17.sp)
         },
         text = {
             Column(
@@ -907,20 +905,20 @@ fun EditProfileModal(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Name (નામ)
+                // Name
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("નામ (Full Name)") },
+                    label = { Text("Full Name") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("edit_profile_name_input")
                 )
 
-                // Title (ટોઇટલ / ભૂમિકા)
+                // Title / Role
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("ટાઇટલ / ભૂમિકા (Role e.g. All-rounder & Captain)") },
+                    label = { Text("Role (e.g. All-rounder & Captain)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("edit_profile_title_input")
                 )
@@ -933,7 +931,7 @@ fun EditProfileModal(
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        label = { Text("ફોન") },
+                        label = { Text("Phone Number") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.weight(1f)
@@ -941,14 +939,14 @@ fun EditProfileModal(
                     OutlinedTextField(
                         value = city,
                         onValueChange = { city = it },
-                        label = { Text("શહેર (City)") },
+                        label = { Text("City") },
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
                 HorizontalDivider(color = Color(0xFFF1F5F9))
-                Text("કારકિર્દી આંકડા (Career Stats):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("Career Stats:", fontWeight = FontWeight.Bold, fontSize = 13.sp)
 
                 // Matches, Runs, Wickets
                 Row(
@@ -958,7 +956,7 @@ fun EditProfileModal(
                     OutlinedTextField(
                         value = matchesText,
                         onValueChange = { matchesText = it },
-                        label = { Text("મેચ") },
+                        label = { Text("Matches") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f).testTag("edit_profile_matches_input")
@@ -966,7 +964,7 @@ fun EditProfileModal(
                     OutlinedTextField(
                         value = runsText,
                         onValueChange = { runsText = it },
-                        label = { Text("ટોટલ રન") },
+                        label = { Text("Total Runs") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1.2f).testTag("edit_profile_runs_input")
@@ -974,7 +972,7 @@ fun EditProfileModal(
                     OutlinedTextField(
                         value = wicketsText,
                         onValueChange = { wicketsText = it },
-                        label = { Text("વિકેટ") },
+                        label = { Text("Wickets") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f).testTag("edit_profile_wickets_input")
@@ -989,14 +987,14 @@ fun EditProfileModal(
                     OutlinedTextField(
                         value = highestScore,
                         onValueChange = { highestScore = it },
-                        label = { Text("સર્વોચ્ચ સ્કોર (HS)") },
+                        label = { Text("Highest Score (HS)") },
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = bestBowling,
                         onValueChange = { bestBowling = it },
-                        label = { Text("શ્રેષ્ઠ બોલિંગ (BB)") },
+                        label = { Text("Best Bowling (BB)") },
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
@@ -1014,12 +1012,12 @@ fun EditProfileModal(
                 colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
                 modifier = Modifier.testTag("save_profile_button")
             ) {
-                Text("સેવ કરો (Save Changes)", fontWeight = FontWeight.Bold)
+                Text("Save Changes", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("રદ કરો (Cancel)")
+                Text("Cancel")
             }
         }
     )
@@ -1077,18 +1075,18 @@ fun MatchHistoryItemCard(record: PlayerMatchRecord) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("🏏 બેટિંગ (Batting)", fontSize = 11.sp, color = CricTextSecondary)
+                    Text("🏏 Batting", fontSize = 11.sp, color = CricTextSecondary)
                     Text(
-                        text = "${record.runs} રન (${record.balls} બોલ) • ${record.fours}x4, ${record.sixes}x6",
+                        text = "${record.runs} runs (${record.balls} balls) • ${record.fours}x4, ${record.sixes}x6",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = CricTeal
                     )
                 }
                 Column {
-                    Text("⚡ બોલિંગ (Bowling)", fontSize = 11.sp, color = CricTextSecondary)
+                    Text("⚡ Bowling", fontSize = 11.sp, color = CricTextSecondary)
                     Text(
-                        text = "${record.wickets} વિકેટ (${record.runsConceded} રન, ${record.oversBowled} ov)",
+                        text = "${record.wickets} wkts (${record.runsConceded} runs, ${record.oversBowled} ov)",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = CricGold
@@ -1096,9 +1094,9 @@ fun MatchHistoryItemCard(record: PlayerMatchRecord) {
                 }
                 if (record.catches > 0 || record.runOuts > 0) {
                     Column {
-                        Text("🧤 ફિલ્ડિંગ", fontSize = 11.sp, color = CricTextSecondary)
+                        Text("🧤 Fielding", fontSize = 11.sp, color = CricTextSecondary)
                         Text(
-                            text = "${record.catches} કેચ" + if (record.runOuts > 0) ", ${record.runOuts} RO" else "",
+                            text = "${record.catches} catch" + (if (record.catches > 1) "es" else "") + if (record.runOuts > 0) ", ${record.runOuts} RO" else "",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             color = CricSecondary
@@ -1177,7 +1175,7 @@ fun LeaderboardRowItem(item: LeaderboardItem) {
                                 shape = RoundedCornerShape(4.dp)
                             ) {
                                 Text(
-                                    text = "તમે (You)",
+                                    text = "You",
                                     color = Color.White,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,

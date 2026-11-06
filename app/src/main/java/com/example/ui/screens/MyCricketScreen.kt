@@ -86,7 +86,7 @@ fun MyCricketScreen(
         ) {
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 Text(
-                    text = "My Cricket (મારું ક્રિકેટ)",
+                    text = "My Cricket",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.onSurface
@@ -118,7 +118,7 @@ fun MyCricketScreen(
             Tab(
                 selected = selectedTab == 2,
                 onClick = { selectedTab = 2 },
-                text = { Text("Tournaments", fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal) }
+                text = { Text("Tournaments (Free)", fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal) }
             )
         }
 
@@ -162,7 +162,7 @@ fun MyCricketScreen(
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "ટીમના નામ, ખેલાડીઓ ઉમેરો, ટોસ કરો અને લાઈવ સ્કોરિંગ શરૂ કરો.",
+                                    text = "Set team names, add players, toss and start live scoring.",
                                     color = Color.White.copy(alpha = 0.9f),
                                     fontSize = 13.sp,
                                     lineHeight = 18.sp
@@ -291,9 +291,14 @@ fun MyCricketScreen(
                 }
 
                 2 -> {
-                    // TOURNAMENTS
+                    // TOURNAMENTS (100% FREE ENTRY)
                     SampleData.tournaments.forEach { t ->
-                        TournamentCardItem(tournament = t)
+                        TournamentCardItem(
+                            tournament = t,
+                            onRegister = {
+                                viewModel.showToast("Team registered for ${t.name} successfully (Free Entry)!")
+                            }
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                     }
                 }

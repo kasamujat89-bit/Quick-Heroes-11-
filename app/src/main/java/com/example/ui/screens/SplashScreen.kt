@@ -169,9 +169,9 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Gujarati Tagline
+            // Tagline
             Text(
-                text = "લાઈવ સ્કોરિંગ અને મેચ મેનેજમેન્ટ",
+                text = "Live Cricket Scoring & Match Management",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color(0xFFE2E8F0),
@@ -222,7 +222,7 @@ fun SplashScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "મેચ શરૂ કરો (Start)",
+                    text = "Get Started",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )

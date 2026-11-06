@@ -93,9 +93,9 @@ fun MatchSetupScreen(
     modifier: Modifier = Modifier
 ) {
     // 3-Step Wizard:
-    // Step 0: Teams & Match Settings (ટીમ અને ઓવર્સ)
-    // Step 1: Players & Squad (ખેલાડીઓના નામ ઉમેરો)
-    // Step 2: Toss & Openers (ટોસ અને ઓપનિંગ ખેલાડીઓ)
+    // Step 0: Teams & Match Settings
+    // Step 1: Players & Squads
+    // Step 2: Toss & Openers
     var currentStep by remember { mutableIntStateOf(0) }
     val savedRoster by viewModel.players.collectAsState()
 
@@ -156,7 +156,7 @@ fun MatchSetupScreen(
     fun addPlayer(name: String, role: String, city: String = venue, phone: String = newPlayerMobileInput) {
         val trimmed = name.trim()
         if (trimmed.isBlank()) {
-            inputErrorText = "કૃપા કરીને ખેલાડીનું નામ લખો (Please enter player name)"
+            inputErrorText = "Please enter player name"
             return
         }
         val newPlayer = Player(
@@ -177,7 +177,7 @@ fun MatchSetupScreen(
         newPlayerNameInput = ""
         newPlayerMobileInput = ""
         inputErrorText = null
-        successAddMessage = "✓ $trimmed ને $activeTeamName માં ઉમેર્યા અને કાયમ માટે સેવ કર્યા!"
+        successAddMessage = "✓ Added $trimmed to $activeTeamName and saved permanently!"
     }
 
     // Step 2: Toss & Openers
@@ -227,7 +227,7 @@ fun MatchSetupScreen(
                 Spacer(modifier = Modifier.width(6.dp))
                 Column {
                     Text(
-                        text = "Start Match (મેચ લાઇવ કરો)",
+                        text = "Start Match",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurface
@@ -289,13 +289,13 @@ fun MatchSetupScreen(
             when (currentStep) {
                 // ================= STEP 0: TEAMS & MATCH SETTINGS =================
                 0 -> {
-                    Text("ટીમના નામ (Team Names)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = CricTeal)
+                    Text("Team Names", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = CricTeal)
                     Spacer(modifier = Modifier.height(10.dp))
 
                     OutlinedTextField(
                         value = teamAName,
                         onValueChange = { teamAName = it },
-                        label = { Text("Team 1 Name (દા.ત. Naliya Royals)") },
+                        label = { Text("Team 1 Name (e.g. Naliya Royals)") },
                         leadingIcon = { Icon(Icons.Default.Groups, contentDescription = null, tint = CricSecondary) },
                         modifier = Modifier.fillMaxWidth().testTag("team_a_input"),
                         shape = RoundedCornerShape(12.dp),
@@ -307,7 +307,7 @@ fun MatchSetupScreen(
                     OutlinedTextField(
                         value = teamBName,
                         onValueChange = { teamBName = it },
-                        label = { Text("Team 2 Name (દા.ત. Kutch Warriors)") },
+                        label = { Text("Team 2 Name (e.g. Kutch Warriors)") },
                         leadingIcon = { Icon(Icons.Default.Groups, contentDescription = null, tint = CricTeal) },
                         modifier = Modifier.fillMaxWidth().testTag("team_b_input"),
                         shape = RoundedCornerShape(12.dp),
@@ -319,7 +319,7 @@ fun MatchSetupScreen(
                     OutlinedTextField(
                         value = venue,
                         onValueChange = { venue = it },
-                        label = { Text("Ground / Venue (ગ્રાઉન્ડ)") },
+                        label = { Text("Ground / Venue") },
                         leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, tint = CricTextSecondary) },
                         modifier = Modifier.fillMaxWidth().testTag("venue_input"),
                         shape = RoundedCornerShape(12.dp),
@@ -330,7 +330,7 @@ fun MatchSetupScreen(
                     HorizontalDivider(color = Color(0xFFF1F5F9))
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("મેચ ટાઇપ અને ઓવર્સ (Match Type & Overs)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CricTeal)
+                    Text("Match Type & Overs", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CricTeal)
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text("Ball Type:", fontSize = 12.sp, color = CricTextSecondary)
@@ -361,7 +361,7 @@ fun MatchSetupScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text("Select Total Overs (ઓવર્સ):", fontSize = 12.sp, color = CricTextSecondary)
+                    Text("Select Total Overs:", fontSize = 12.sp, color = CricTextSecondary)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -400,7 +400,7 @@ fun MatchSetupScreen(
                             .height(50.dp)
                             .testTag("next_to_players_button")
                     ) {
-                        Text("Next: Add Players (ખેલાડીઓ ઉમેરો)", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text("Next: Add Players", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
                     }
@@ -408,8 +408,8 @@ fun MatchSetupScreen(
 
                 // ================= STEP 1: SQUADS & PLAYER NAMES =================
                 1 -> {
-                    Text("ખેલાડીઓના નામ ઉમેરો (Add Players)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = CricTeal)
-                    Text("બંને ટીમના ખેલાડીઓના નામ દાખલ કરો જેથી સ્કોરિંગમાં સાચા નામ દેખાય.", fontSize = 12.sp, color = CricTextSecondary)
+                    Text("Add Squads & Players", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = CricTeal)
+                    Text("Enter player names for both teams to enable real-time scoring.", fontSize = 12.sp, color = CricTextSecondary)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Team A vs Team B Tab Selector
@@ -519,7 +519,7 @@ fun MatchSetupScreen(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Add to $activeTeamName (ખેલાડી ઉમેરો)",
+                                    text = "Add to $activeTeamName",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -535,10 +535,10 @@ fun MatchSetupScreen(
                                     newPlayerNameInput = it
                                     inputErrorText = null
                                 },
-                                label = { Text("Player Name (ખેલાડીનું નામ)") },
+                                label = { Text("Player Name") },
                                 placeholder = {
                                     Text(
-                                        "દા.ત. Kasam Jat, Latif...",
+                                        "e.g. Kasam Jat, Latif...",
                                         fontSize = 13.sp,
                                         color = CricTextSecondary
                                     )
@@ -576,9 +576,9 @@ fun MatchSetupScreen(
                             OutlinedTextField(
                                 value = newPlayerMobileInput,
                                 onValueChange = { newPlayerMobileInput = it },
-                                label = { Text("Mobile Number (મોબાઈલ નંબર)") },
+                                label = { Text("Mobile Number (Optional)") },
                                 placeholder = {
-                                    Text("દા.ત. 98250 12345", fontSize = 13.sp, color = CricTextSecondary)
+                                    Text("e.g. 98250 12345", fontSize = 13.sp, color = CricTextSecondary)
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Default.Phone, contentDescription = null, tint = CricTeal)
@@ -606,7 +606,7 @@ fun MatchSetupScreen(
                             Spacer(modifier = Modifier.height(10.dp))
 
                             // Role Selection Chips
-                            Text("Player Role (રોલ પસંદ કરો):", fontSize = 12.sp, color = CricTextSecondary, fontWeight = FontWeight.Medium)
+                            Text("Player Role:", fontSize = 12.sp, color = CricTextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
                             Row(
                                 modifier = Modifier
@@ -656,7 +656,7 @@ fun MatchSetupScreen(
                                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Add Player to $activeTeamName (+ ઉમેરો)",
+                                    text = "Add Player to $activeTeamName",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                                 )
@@ -673,7 +673,7 @@ fun MatchSetupScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "📂 સેવ થયેલા ખેલાડીઓ (Saved Roster - Tap to Add):",
+                            text = "📂 Saved Roster (Tap to Add):",
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
                             color = CricTeal
@@ -683,7 +683,7 @@ fun MatchSetupScreen(
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
-                                text = "${savedRoster.size} સેવ થયેલા",
+                                text = "${savedRoster.size} saved",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = CricTeal,
@@ -716,7 +716,7 @@ fun MatchSetupScreen(
                                         } else {
                                             teamBPlayers = teamBPlayers + pToAdd
                                         }
-                                        successAddMessage = "✓ ${savedP.name} ને $activeTeamName માં ઉમેર્યા!"
+                                        successAddMessage = "✓ Added ${savedP.name} to $activeTeamName!"
                                     },
                                 color = if (alreadyInTeam) Color(0xFFE2E8F0) else CricTealLight,
                                 shape = RoundedCornerShape(16.dp),
@@ -792,14 +792,14 @@ fun MatchSetupScreen(
                                     Icon(Icons.Default.Groups, contentDescription = null, tint = CricTextSecondary, modifier = Modifier.size(36.dp))
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        "કોઈ ખેલાડી ઉમેર્યા નથી (No Players Added)",
+                                        "No Players Added Yet",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        "ઉપર નામ લખીને '+ Add' દબાવો અથવા ઉપરના સૂચિત ખેલાડી પર ક્લિક કરો.",
+                                        "Enter player name above and tap '+ Add' or tap a saved player above.",
                                         fontSize = 12.sp,
                                         color = CricTextSecondary,
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -919,7 +919,7 @@ fun MatchSetupScreen(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f).height(50.dp)
                         ) {
-                            Text("Back (પાછા)")
+                            Text("Back")
                         }
 
                         Button(
@@ -955,10 +955,10 @@ fun MatchSetupScreen(
 
                 // ================= STEP 2: TOSS & OPENERS (GO LIVE!) =================
                 2 -> {
-                    Text("ટોસ અને ઓપનિંગ પ્લેયર્સ (Toss & Openers)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = CricTeal)
+                    Text("Toss & Opening Players", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = CricTeal)
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text("ટોસ કોણ જીત્યું? (Who won the toss?):", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Who won the toss?:", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1000,7 +1000,7 @@ fun MatchSetupScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text("નિર્ણય (Elected to):", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Elected to:", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1016,7 +1016,7 @@ fun MatchSetupScreen(
                                 border = if (isSel) CardDefaults.outlinedCardBorder().copy(width = 1.dp) else null
                             ) {
                                 Text(
-                                    text = if (opt == "Bat") "Batting (બેટિંગ)" else "Bowling (બોલિંગ)",
+                                    text = if (opt == "Bat") "Batting" else "Bowling",
                                     fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
                                     color = if (isSel) CricTeal else CricTextPrimary,
                                     fontSize = 13.sp,
@@ -1051,7 +1051,7 @@ fun MatchSetupScreen(
                     val currentOpeningBowler = bowlingPlayers.firstOrNull { it.id == selectedOpeningBowler.id } ?: bowlingPlayers.firstOrNull() ?: Player("def_bow", "Bowler", "Bhuj")
 
                     // Openers Selection
-                    Text("ઓપનિંગ સ્ટ્રાઈકર બેટ્સમેન (*):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Opening Striker Batsman (*):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1080,7 +1080,7 @@ fun MatchSetupScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text("નોન-સ્ટ્રાઈકર બેટ્સમેન:", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Non-Striker Batsman (*):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1109,7 +1109,7 @@ fun MatchSetupScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text("ઓપનિંગ બોલર ($bowlingTeamName):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Opening Bowler ($bowlingTeamName):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1185,7 +1185,7 @@ fun MatchSetupScreen(
                     ) {
                         Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(22.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("🚀 Go Live & Start Scoring (મેચ લાઇવ કરો)", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("🚀 Go Live & Start Scoring", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
                     }
 
                     Spacer(modifier = Modifier.height(40.dp))

@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.example.data.SampleData
 import com.example.ui.theme.CricCardLight
 import com.example.ui.theme.CricDarkCard
 import com.example.ui.theme.CricDarkTextPrimary
@@ -533,7 +535,7 @@ fun PlayerDetailDialog(
     onDismiss: () -> Unit
 ) {
     var dialogTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("બેટિંગ", "બોલિંગ", "ફિલ્ડિંગ", "હિસ્ટ્રી", "ટીમો")
+    val tabs = listOf("Batting", "Bowling", "Fielding", "Badges", "History", "Teams")
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -602,7 +604,7 @@ fun PlayerDetailDialog(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "મોબાઈલ નંબર: ${player.phone}",
+                                text = "Mobile: +91 ${player.phone}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = CricTeal
@@ -630,7 +632,7 @@ fun PlayerDetailDialog(
                                 fontSize = 17.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            Text("મેચ", fontSize = 11.sp, color = CricTextSecondary)
+                            Text("Matches", fontSize = 11.sp, color = CricTextSecondary)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
@@ -639,7 +641,7 @@ fun PlayerDetailDialog(
                                 fontSize = 17.sp,
                                 color = CricSecondary
                             )
-                            Text("ટોટલ રન", fontSize = 11.sp, color = CricTextSecondary)
+                            Text("Total Runs", fontSize = 11.sp, color = CricTextSecondary)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
@@ -648,7 +650,7 @@ fun PlayerDetailDialog(
                                 fontSize = 17.sp,
                                 color = CricTeal
                             )
-                            Text("કુલ વિકેટ", fontSize = 11.sp, color = CricTextSecondary)
+                            Text("Total Wickets", fontSize = 11.sp, color = CricTextSecondary)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
@@ -657,7 +659,7 @@ fun PlayerDetailDialog(
                                 fontSize = 17.sp,
                                 color = CricGold
                             )
-                            Text("કેચ", fontSize = 11.sp, color = CricTextSecondary)
+                            Text("Catches", fontSize = 11.sp, color = CricTextSecondary)
                         }
                     }
                 }
@@ -695,12 +697,12 @@ fun PlayerDetailDialog(
                             border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)
                         ) {
                             Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                PlayerSpecRow("કુલ રન (Runs)", "${player.runs}")
-                                PlayerSpecRow("સર્વોચ્ચ સ્કોર (HS)", if (player.highestScore != "-") player.highestScore else "${(player.runs / (player.matches.coerceAtLeast(1) * 3)).coerceAtLeast(42)}*")
-                                PlayerSpecRow("સ્ટ્રાઇક રેટ (SR)", if (player.strikeRate > 0) String.format("%.1f", player.strikeRate) else "138.4")
-                                PlayerSpecRow("સરેરાશ (Avg)", if (player.battingAvg > 0) String.format("%.1f", player.battingAvg) else "36.2")
+                                PlayerSpecRow("Total Runs", "${player.runs}")
+                                PlayerSpecRow("Highest Score (HS)", if (player.highestScore != "-") player.highestScore else "${(player.runs / (player.matches.coerceAtLeast(1) * 3)).coerceAtLeast(42)}*")
+                                PlayerSpecRow("Strike Rate (SR)", if (player.strikeRate > 0) String.format("%.1f", player.strikeRate) else "138.4")
+                                PlayerSpecRow("Batting Average", if (player.battingAvg > 0) String.format("%.1f", player.battingAvg) else "36.2")
                                 PlayerSpecRow("50s / 100s", "${player.fifties} / ${player.hundreds}")
-                                PlayerSpecRow("બેટિંગ શૈલી", player.battingStyle)
+                                PlayerSpecRow("Batting Style", player.battingStyle)
                             }
                         }
                     }
@@ -711,10 +713,10 @@ fun PlayerDetailDialog(
                             border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)
                         ) {
                             Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                PlayerSpecRow("કુલ વિકેટ (Wickets)", "${player.wickets}")
-                                PlayerSpecRow("શ્રેષ્ઠ બોલિંગ", if (player.bestBowling != "-") player.bestBowling else "4/18")
-                                PlayerSpecRow("ઇકોનોમી (Eco)", if (player.bowlingEconomy > 0) String.format("%.1f", player.bowlingEconomy) else "6.5")
-                                PlayerSpecRow("બોલિંગ શૈલી", player.bowlingStyle)
+                                PlayerSpecRow("Total Wickets", "${player.wickets}")
+                                PlayerSpecRow("Best Bowling", if (player.bestBowling != "-") player.bestBowling else "4/18")
+                                PlayerSpecRow("Economy Rate (Eco)", if (player.bowlingEconomy > 0) String.format("%.1f", player.bowlingEconomy) else "6.5")
+                                PlayerSpecRow("Bowling Style", player.bowlingStyle)
                             }
                         }
                     }
@@ -725,17 +727,48 @@ fun PlayerDetailDialog(
                             border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)
                         ) {
                             Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                PlayerSpecRow("કેચ (Catches)", "${player.catches}")
-                                PlayerSpecRow("રન આઉટ (Run Outs)", "${player.runOuts}")
-                                PlayerSpecRow("સ્ટમ્પિંગ (Stumpings)", "${player.stumpings}")
-                                PlayerSpecRow("જર્સી નંબર", "#${player.jerseyNumber}")
+                                PlayerSpecRow("Catches", "${player.catches}")
+                                PlayerSpecRow("Run Outs", "${player.runOuts}")
+                                PlayerSpecRow("Stumpings", "${player.stumpings}")
+                                PlayerSpecRow("Jersey Number", "#${player.jerseyNumber}")
                             }
                         }
                     }
-                    3 -> { // Match History
+                    3 -> { // Digital Badges & Honours (Requirement 3)
+                        val badgesToShow = if (player.badges.isNotEmpty()) player.badges else SampleData.standardBadges.take(4)
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            badgesToShow.forEach { b ->
+                                Surface(
+                                    color = Color(b.badgeColor).copy(alpha = 0.1f),
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, Color(b.badgeColor).copy(alpha = 0.3f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(b.iconSymbol, fontSize = 22.sp)
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Column {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(b.title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                if (b.titleGujarati.isNotEmpty()) {
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                    Text(b.titleGujarati, fontSize = 10.sp, color = CricTeal)
+                                                }
+                                            }
+                                            Text(b.description, fontSize = 10.sp, color = CricTextSecondary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    4 -> { // Match History
                         if (player.matchHistory.isEmpty()) {
                             Text(
-                                "આ ખેલાડીની પાછલી મેચ હિસ્ટ્રી હજી ઉપલબ્ધ નથી.",
+                                "No match history recorded for this player yet.",
                                 fontSize = 12.sp,
                                 color = CricTextSecondary,
                                 modifier = Modifier.padding(8.dp)
@@ -758,7 +791,7 @@ fun PlayerDetailDialog(
                                                 Text(hist.result, color = if (hist.result.contains("Won", true)) Color(0xFF166534) else Color(0xFF991B1B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                             }
                                             Text(
-                                                "${hist.runs} રન (${hist.balls}b) • ${hist.wickets} વિકેટ • ${hist.catches} કેચ",
+                                                "${hist.runs} runs (${hist.balls}b) • ${hist.wickets} wkts • ${hist.catches} ct",
                                                 fontSize = 11.sp,
                                                 color = CricTeal
                                             )
@@ -768,7 +801,7 @@ fun PlayerDetailDialog(
                             }
                         }
                     }
-                    4 -> { // Teams
+                    5 -> { // Teams
                         val teamsList = if (player.teamsRepresented.isNotEmpty()) player.teamsRepresented else listOf("Naliya Royals")
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             teamsList.forEach { tName ->
@@ -799,7 +832,7 @@ fun PlayerDetailDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("બંધ કરો (Close)", fontWeight = FontWeight.Bold)
+                Text("Close", fontWeight = FontWeight.Bold)
             }
         }
     )

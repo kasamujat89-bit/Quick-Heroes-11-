@@ -81,14 +81,14 @@ fun FullScorecardScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "કોઈ સ્કોરકાર્ડ ઉપલબ્ધ નથી",
+                text = "No Scorecard Available",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "સ્કોરકાર્ડ જોવા માટે પહેલા નવી મેચ શરૂ કરો.",
+                text = "Start a new match to view detailed scorecard.",
                 fontSize = 13.sp,
                 color = CricTextSecondary
             )
@@ -98,7 +98,7 @@ fun FullScorecardScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Start Match (મેચ શરૂ કરો)", fontWeight = FontWeight.Bold)
+                Text("Start Match", fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedButton(onClick = onBack) {

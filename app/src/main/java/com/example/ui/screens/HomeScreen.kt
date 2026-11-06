@@ -257,7 +257,7 @@ fun HomeScreen(
             QuickFeatureItem(
                 icon = Icons.Default.EmojiEvents,
                 title = "Tournaments",
-                subtitle = "Standings & Series",
+                subtitle = "100% Free Entry",
                 color = CricGold,
                 modifier = Modifier.weight(1f),
                 onClick = { viewModel.navigateTo(AppScreen.Tournaments) }
@@ -285,7 +285,7 @@ fun HomeScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Recent Matches (તાજેતરની મેચો)",
+                text = "Recent Matches",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -325,14 +325,14 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "કોઈ મેચ રમાયેલી નથી",
+                        text = "No matches played yet",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "નવી મેચ શરૂ કરવા 'Start Match' બટન દબાવો.",
+                        text = "Tap 'Start Match' button to begin a new match.",
                         fontSize = 12.sp,
                         color = CricTextSecondary
                     )
@@ -472,17 +472,17 @@ fun LiveMatchPreviewCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Spectator View Button (બીજાની મેચ / લાઈવ જુઓ)
+                // Spectator View Button
                 Button(
                     onClick = onWatchMatch,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.weight(1.1f).testTag("spectate_live_match_button")
                 ) {
-                    Text("🔴 લાઈવ જુઓ", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    Text("🔴 Watch Live", fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
 
-                // Scorer Mode Button (સ્કોર કરો)
+                // Scorer Mode Button
                 Button(
                     onClick = onScoreMatch,
                     colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
@@ -491,7 +491,7 @@ fun LiveMatchPreviewCard(
                 ) {
                     Icon(Icons.Default.SportsCricket, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(3.dp))
-                    Text("સ્કોર કરો", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    Text("Score Match", fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
 
                 // Scorecard Button
@@ -502,7 +502,7 @@ fun LiveMatchPreviewCard(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.weight(0.9f).testTag("view_scorecard_button")
                 ) {
-                    Text("સ્કોરકાર્ડ", color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp)
+                    Text("Scorecard", color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp)
                 }
             }
         }
@@ -629,7 +629,7 @@ fun StartMatchHomePromptCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "NEW MATCH (નવી મેચ)",
+                        text = "NEW MATCH",
                         color = CricTeal,
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp
@@ -644,7 +644,7 @@ fun StartMatchHomePromptCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "ટીમો અને ખેલાડીઓ ઉમેરીને મેચ લાઇવ શરૂ કરો",
+                    text = "Add teams and players to start live scoring",
                     fontSize = 12.sp,
                     color = CricTextSecondary
                 )

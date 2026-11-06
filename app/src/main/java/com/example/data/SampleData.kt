@@ -264,7 +264,8 @@ object SampleData {
             city = "Bhuj",
             teamsCount = 16,
             startDate = "15 Nov 2026",
-            prizeMoney = "₹1,51,000",
+            prizeMoney = "Winner Trophy & Medals",
+            entryFee = "100% Free Entry",
             bannerColor = 0xFFDC2626
         ),
         Tournament(
@@ -273,17 +274,19 @@ object SampleData {
             city = "Naliya",
             teamsCount = 12,
             startDate = "01 Dec 2026",
-            prizeMoney = "₹75,000",
+            prizeMoney = "Champions Trophy & Honors",
+            entryFee = "100% Free Entry",
             bannerColor = 0xFF0D9488
         ),
         Tournament(
             id = "t3",
-            name = "Gujarat Box Cricket Championship",
+            name = "Gujarat Grassroots Championship",
             city = "Ahmedabad",
             teamsCount = 24,
             startDate = "20 Dec 2026",
-            prizeMoney = "₹2,00,000",
-            bannerColor = 0xFFF59E0B
+            prizeMoney = "Gold Trophy & Certificates",
+            entryFee = "100% Free Entry",
+            bannerColor = 0xFF0F766E
         )
     )
 
@@ -329,4 +332,217 @@ object SampleData {
             contactPhone = "9723456789"
         )
     )
+
+    // Digital Badges & Medals Seed Data (Requirement)
+    val standardBadges = listOf(
+        DigitalBadge(
+            id = "b_fifty",
+            title = "Half-Century Star",
+            titleGujarati = "અર્ધશતક સ્ટાર (૫૦ રન)",
+            description = "Scored 50+ runs in a high-pressure match",
+            category = "Batting",
+            iconSymbol = "🏏",
+            badgeColor = 0xFFF59E0B, // Gold
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        ),
+        DigitalBadge(
+            id = "b_century",
+            title = "Century Legend",
+            titleGujarati = "શતક લિજેન્ડ (૧૦૦ રન)",
+            description = "Magnificent 100+ runs single innings milestone",
+            category = "Batting",
+            iconSymbol = "👑",
+            badgeColor = 0xFFEF4444, // Red Ruby
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        ),
+        DigitalBadge(
+            id = "b_fifer",
+            title = "Fifer Hero (5 Wkts)",
+            titleGujarati = "૫ વિકેટ હીરો",
+            description = "Demolished opposition taking 5 wickets in an innings",
+            category = "Bowling",
+            iconSymbol = "🔥",
+            badgeColor = 0xFF8B5CF6, // Purple
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        ),
+        DigitalBadge(
+            id = "b_mom",
+            title = "Player of the Match",
+            titleGujarati = "પ્લેયર ઓફ ધ મેચ",
+            description = "Awarded Man of the Match for match-winning heroics",
+            category = "Special",
+            iconSymbol = "🏆",
+            badgeColor = 0xFF10B981, // Emerald
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        ),
+        DigitalBadge(
+            id = "b_hattrick",
+            title = "Hat-trick Hunter",
+            titleGujarati = "હેટ્રિક હન્ટર",
+            description = "3 wickets in 3 consecutive balls",
+            category = "Bowling",
+            iconSymbol = "⚡",
+            badgeColor = 0xFF06B6D4, // Cyan
+            dateUnlocked = "Locked",
+            isUnlocked = false
+        ),
+        DigitalBadge(
+            id = "b_sixer",
+            title = "Sixer King (5+ Sixes)",
+            titleGujarati = "સિક્સર કિંગ (૫+ છગ્ગા)",
+            description = "Smashed 5 or more massive sixes in one innings",
+            category = "Batting",
+            iconSymbol = "🎯",
+            badgeColor = 0xFFF97316, // Orange
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        ),
+        DigitalBadge(
+            id = "b_maiden",
+            title = "Iron Maiden Over",
+            titleGujarati = "આયર્ન મેડન ઓવર",
+            description = "Bowled a maiden over conceding 0 runs",
+            category = "Bowling",
+            iconSymbol = "🛡️",
+            badgeColor = 0xFF3B82F6, // Blue
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        ),
+        DigitalBadge(
+            id = "b_safe_hands",
+            title = "Safe Hands (3+ Catches)",
+            titleGujarati = "સેફ હેન્ડ્સ (૩+ કેચ)",
+            description = "Took 3+ stunning catches in a single match",
+            category = "Fielding",
+            iconSymbol = "🧤",
+            badgeColor = 0xFFEC4899, // Pink
+            dateUnlocked = "Unlocked",
+            isUnlocked = true
+        )
+    )
+
+    // Player Marketplace / Urgent Requirements (Requirement)
+    val samplePlayerRequirements = listOf(
+        PlayerRequirement(
+            id = "req_1",
+            teamName = "Naliya Royals",
+            roleNeeded = "Fast Bowler",
+            matchDate = "Sunday, 08 Nov • 7:30 AM",
+            groundCity = "Naliya High School Ground",
+            oversType = "20 Overs Leather Ball",
+            contactPhone = "8980294520",
+            urgent = true,
+            postedBy = "Capt. Kasam Jat",
+            applicantsCount = 3,
+            timeAgo = "10 mins ago"
+        ),
+        PlayerRequirement(
+            id = "req_2",
+            teamName = "Kutch Strikers",
+            roleNeeded = "Wicketkeeper Batsman",
+            matchDate = "Saturday, 07 Nov • 1:30 PM",
+            groundCity = "Bhuj Gymkhana Ground",
+            oversType = "16 Overs Tennis Ball",
+            contactPhone = "9825123456",
+            urgent = true,
+            postedBy = "Capt. Imran Baloch",
+            applicantsCount = 5,
+            timeAgo = "25 mins ago"
+        ),
+        PlayerRequirement(
+            id = "req_3",
+            teamName = "Gandhidham Lions",
+            roleNeeded = "Top-Order Batsman",
+            matchDate = "Sunday, 08 Nov • 9:00 AM",
+            groundCity = "Gandhidham Cricket Oval",
+            oversType = "20 Overs Leather Ball",
+            contactPhone = "9898001122",
+            urgent = false,
+            postedBy = "Capt. Hitesh Patel",
+            applicantsCount = 2,
+            timeAgo = "1 hour ago"
+        ),
+        PlayerRequirement(
+            id = "req_4",
+            teamName = "Mundra Warriors",
+            roleNeeded = "Spin Bowler",
+            matchDate = "Tuesday, 10 Nov • 3:00 PM",
+            groundCity = "Mundra Port Ground",
+            oversType = "15 Overs Tennis Ball",
+            contactPhone = "9723456789",
+            urgent = true,
+            postedBy = "Capt. Dilip Jadeja",
+            applicantsCount = 1,
+            timeAgo = "2 hours ago"
+        )
+    )
+
+    // Live Auto-Commentary Feed (Requirement)
+    val sampleCommentaryList = listOf(
+        CommentaryItem(
+            id = "c1",
+            overText = "14.2",
+            headline = "CRACKING SIX! Out of the park!",
+            commentaryGujarati = "હવામાં શાનદાર શોટ અને આ સીધા 6 રન! બોલ સીધો દર્શકોની વચ્ચે!",
+            commentaryHindi = "हवा में खूबसूरत शॉट और गेंद सीधे दर्शकों के बीच 6 रन के लिए!",
+            commentaryEnglish = "What a magnificent towering shot into the stands for a huge SIX!",
+            bowlerName = "Sajid Jat",
+            batsmanName = "Kasam Jat",
+            runs = 6,
+            isSix = true,
+            timestamp = "Just now"
+        ),
+        CommentaryItem(
+            id = "c2",
+            overText = "14.1",
+            headline = "FOUR! Pierces the cover gap!",
+            commentaryGujarati = "ચાર રન! ગેપમાં સુંદર કટ શોટ અને બોલ સીધો બાઉન્ડ્રી લાઈન બહાર!",
+            commentaryHindi = "चार रन! गैप में शानदार प्लेसमेंट और गेंद गोली की रफ्तार से बाउंड्री पार!",
+            commentaryEnglish = "CRACKING FOUR! Pierces the cover field with sublime timing to the fence!",
+            bowlerName = "Sajid Jat",
+            batsmanName = "Kasam Jat",
+            runs = 4,
+            isBoundary = true,
+            timestamp = "1 min ago"
+        ),
+        CommentaryItem(
+            id = "c3",
+            overText = "13.6",
+            headline = "Single to deep midwicket",
+            commentaryGujarati = "હળવા હાથે ટેપ કરીને ઝડપી સિંગલ રન પૂર્ણ કર્યો.",
+            commentaryHindi = "हल्के हाथों से खेला और तेजी से दौड़कर एक रन पूरा किया.",
+            commentaryEnglish = "Tapped gently into the leg side, easy single taken.",
+            bowlerName = "Karam Khan",
+            batsmanName = "Irfan Pathan",
+            runs = 1,
+            timestamp = "2 mins ago"
+        ),
+        CommentaryItem(
+            id = "c4",
+            overText = "13.5",
+            headline = "WICKET! Clean Bowled!",
+            commentaryGujarati = "આઉટ! મોટી સફળતા! બોલરે સ્ટમ્પ ઉડાવીને ક્લીન બોલ્ડ કરી દીધો!",
+            commentaryHindi = "विकेट! बड़ा झटका! क्लीन बोल्ड होकर बल्लेबाज पवेलियन लौटे!",
+            commentaryEnglish = "WICKET! Stumps shattered! A searing yorker cleans him up completely!",
+            bowlerName = "Karam Khan",
+            batsmanName = "Hasan Jat",
+            runs = 0,
+            isWicket = true,
+            timestamp = "3 mins ago"
+        )
+    )
+
+    // 100% Free Fantasy League Standings (Requirement)
+    val sampleFantasyLeaderboard = listOf(
+        FantasyLeaderboardEntry(1, "Kasam Jat (You)", "Naliya Super Kings XI", "Kasam Jat (C)", 482, isCurrentUser = true),
+        FantasyLeaderboardEntry(2, "Hasan Baloch", "Kutch Thunder XI", "Irfan Pathan (C)", 465),
+        FantasyLeaderboardEntry(3, "Imran Khan", "Desert Storm 11", "Karam Khan (C)", 448),
+        FantasyLeaderboardEntry(4, "Farooq Jat", "Naliya Express XI", "Sajid Jat (C)", 420),
+        FantasyLeaderboardEntry(5, "Irfan Sandh", "Royal Grassroots 11", "Kasam Jat (C)", 398)
+    )
 }
+

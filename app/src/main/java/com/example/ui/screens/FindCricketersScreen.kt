@@ -212,7 +212,7 @@ fun FindCricketersScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "We found 315 friends from your contacts who are on CricHeroes. Follow them to build your network.",
+                    text = "We found 315 friends from your contacts who are on Quick Heroes 11. Follow them to build your network.",
                     color = Color.White,
                     fontSize = 13.sp,
                     lineHeight = 18.sp,

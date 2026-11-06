@@ -91,7 +91,7 @@ fun StoreScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "CricHeroes Store",
+                        text = "Quick Heroes 11 Store",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )

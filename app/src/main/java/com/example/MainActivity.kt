@@ -57,6 +57,15 @@ import com.example.ui.components.CricHeroesBottomBar
 import com.example.ui.components.CricHeroesTopBar
 import com.example.ui.components.ProfileDrawerContent
 import com.example.ui.components.PlayerDetailDialog
+import com.example.ui.components.RegisterWithMobileDialog
+import com.example.ui.components.NotificationSettingsDialog
+import com.example.ui.components.ChangeLanguageDialog
+import com.example.ui.components.ClearDataDialog
+import com.example.ui.components.DeleteAccountDialog
+import com.example.ui.components.LogoutDialog
+import com.example.ui.components.SupportDialog
+import com.example.ui.components.AboutAppDialog
+import com.example.ui.components.PrivacyPolicyDialog
 import com.example.ui.screens.FindCricketersScreen
 import com.example.ui.screens.FullScorecardScreen
 import com.example.ui.screens.HomeScreen
@@ -78,6 +87,8 @@ import kotlinx.coroutines.launch
 
 import com.example.ui.screens.ProfileScreen
 import com.example.ui.screens.SplashScreen
+import com.example.ui.screens.LocalFantasyScreen
+import com.example.ui.screens.DigitalBadgesScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +118,17 @@ fun CricHeroesApp(
     val userProfile by viewModel.userProfile.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val selectedViewingPlayer by viewModel.selectedViewingPlayer.collectAsState()
+
+    val isRegisterDialogOpen by viewModel.isRegisterDialogOpen.collectAsState()
+    val isNotificationDialogOpen by viewModel.isNotificationDialogOpen.collectAsState()
+    val isLanguageDialogOpen by viewModel.isLanguageDialogOpen.collectAsState()
+    val isClearDataDialogOpen by viewModel.isClearDataDialogOpen.collectAsState()
+    val isDeleteAccountDialogOpen by viewModel.isDeleteAccountDialogOpen.collectAsState()
+    val isLogoutDialogOpen by viewModel.isLogoutDialogOpen.collectAsState()
+    val isSupportDialogOpen by viewModel.isSupportDialogOpen.collectAsState()
+    val isAboutDialogOpen by viewModel.isAboutDialogOpen.collectAsState()
+    val isPrivacyPolicyDialogOpen by viewModel.isPrivacyPolicyDialogOpen.collectAsState()
+    val toastMessage by viewModel.toastMessage.collectAsState()
 
     // When on Splash Screen, show logo splash screen without scaffolding
     if (currentScreen is AppScreen.Splash) {
@@ -243,6 +265,18 @@ fun CricHeroesApp(
                             onBack = { viewModel.navigateBack() }
                         )
                     }
+                    is AppScreen.LocalFantasy -> {
+                        LocalFantasyScreen(
+                            viewModel = viewModel,
+                            onBack = { viewModel.navigateBack() }
+                        )
+                    }
+                    is AppScreen.DigitalBadges -> {
+                        DigitalBadgesScreen(
+                            viewModel = viewModel,
+                            onBack = { viewModel.navigateBack() }
+                        )
+                    }
                 }
 
                 // Action Menu Dropdown (Matching Screenshot 1)
@@ -272,6 +306,116 @@ fun CricHeroesApp(
             onDismiss = { viewModel.closePlayerView() }
         )
     }
+
+    // Register / Login With Mobile Number Dialog
+    if (isRegisterDialogOpen) {
+        RegisterWithMobileDialog(
+            viewModel = viewModel,
+            onDismiss = { viewModel.isRegisterDialogOpen.value = false }
+        )
+    }
+
+    // Notification Settings Dialog
+    if (isNotificationDialogOpen) {
+        NotificationSettingsDialog(
+            viewModel = viewModel,
+            onDismiss = { viewModel.isNotificationDialogOpen.value = false }
+        )
+    }
+
+    // Change Language Dialog
+    if (isLanguageDialogOpen) {
+        ChangeLanguageDialog(
+            viewModel = viewModel,
+            onDismiss = { viewModel.isLanguageDialogOpen.value = false }
+        )
+    }
+
+    // Clear Data Dialog
+    if (isClearDataDialogOpen) {
+        ClearDataDialog(
+            onConfirm = { viewModel.clearAppData() },
+            onDismiss = { viewModel.isClearDataDialogOpen.value = false }
+        )
+    }
+
+    // Delete Account Dialog
+    if (isDeleteAccountDialogOpen) {
+        DeleteAccountDialog(
+            onConfirm = { viewModel.deleteAccount() },
+            onDismiss = { viewModel.isDeleteAccountDialogOpen.value = false }
+        )
+    }
+
+    // Logout Dialog
+    if (isLogoutDialogOpen) {
+        LogoutDialog(
+            onConfirm = { viewModel.logout() },
+            onDismiss = { viewModel.isLogoutDialogOpen.value = false }
+        )
+    }
+
+    // Support Dialog
+    if (isSupportDialogOpen) {
+        SupportDialog(
+            onDismiss = { viewModel.isSupportDialogOpen.value = false }
+        )
+    }
+
+    // About App Dialog
+    if (isAboutDialogOpen) {
+        AboutAppDialog(
+            onDismiss = { viewModel.isAboutDialogOpen.value = false },
+            onOpenPrivacyPolicy = { viewModel.isPrivacyPolicyDialogOpen.value = true }
+        )
+    }
+
+    // Official Privacy Policy Dialog
+    if (isPrivacyPolicyDialogOpen) {
+        PrivacyPolicyDialog(
+            onDismiss = { viewModel.isPrivacyPolicyDialogOpen.value = false }
+        )
+    }
+
+    // Floating Feedback Toast Banner
+    toastMessage?.let { msg ->
+        androidx.compose.runtime.LaunchedEffect(msg) {
+            kotlinx.coroutines.delay(3200)
+            viewModel.clearToast()
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 75.dp, start = 20.dp, end = 20.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Surface(
+                color = Color(0xFF0F172A),
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 8.dp,
+                modifier = Modifier.padding(6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = CricTeal,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = msg,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -287,24 +431,24 @@ fun CricketHelpDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.size(26.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Quick Heroes 11 સહાય (Help)", fontWeight = FontWeight.Bold)
+                Text("Quick Heroes 11 Help & Guide", fontWeight = FontWeight.Bold)
             }
         },
         text = {
             Column {
                 Text(
-                    text = "લાઈવ સ્કોરિંગ અને મેચ મેનેજમેન્ટ ગાઈડ:",
+                    text = "Live Scoring & Match Management Guide:",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
-                HelpGuideItem("1. મેચ શરૂ કરવા 'Start Match' પર ક્લિક કરો.")
-                HelpGuideItem("2. ટીમ A અને B ના નામ અને ઓવર સેટ કરો.")
-                HelpGuideItem("3. બંને ટીમોના ખેલાડીઓના સાચા નામ ઉમેરો.")
-                HelpGuideItem("4. ટોસ, ઓપનર બેટ્સમેન અને બોલર પસંદ કરી સ્કોરિંગ શરૂ કરો.")
-                HelpGuideItem("5. બોલ-બાય-બોલ કીપેડથી રન (0-6), એક્સ્ટ્રા અને વિકેટ નોંધો.")
+                HelpGuideItem("1. Tap 'Start Match' to configure a new match.")
+                HelpGuideItem("2. Enter Team A and Team B names and total overs.")
+                HelpGuideItem("3. Add player names and mobile numbers to squads.")
+                HelpGuideItem("4. Select toss winner, opening batsmen, and opening bowler.")
+                HelpGuideItem("5. Use live keypad to record runs (0-6), extras, and wickets.")
 
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
@@ -313,7 +457,7 @@ fun CricketHelpDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "✓ 100% મફત લાઈવ સ્કોરિંગ - કોઈપણ પ્લાન કે ચાર્જ વિના!",
+                        text = "✓ 100% Free Live Cricket Scoring - No subscription or hidden fees!",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF166534),
@@ -328,7 +472,7 @@ fun CricketHelpDialog(onDismiss: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("સમજાયું (Got it)", fontWeight = FontWeight.Bold)
+                Text("Got It", fontWeight = FontWeight.Bold)
             }
         }
     )

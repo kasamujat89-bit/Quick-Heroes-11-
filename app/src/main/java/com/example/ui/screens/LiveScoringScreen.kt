@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,15 +46,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.Translate
+import com.example.data.CommentaryItem
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -95,6 +104,13 @@ fun LiveScoringScreen(
     val isBowlerModalOpen by viewModel.isBowlerModalOpen.collectAsState()
     val isMatchFinishedModalOpen by viewModel.isMatchFinishedModalOpen.collectAsState()
 
+    val isOfflineMode by viewModel.isOfflineMode.collectAsState()
+    val pendingOfflineEvents by viewModel.pendingOfflineEvents.collectAsState()
+    val isSyncing by viewModel.isSyncing.collectAsState()
+    val commentaryList by viewModel.commentaryList.collectAsState()
+    val commentaryLanguage by viewModel.commentaryLanguage.collectAsState()
+    var scoringScreenTab by remember { mutableIntStateOf(0) } // 0: Scoring Pad, 1: Auto-Commentary, 2: Fantasy 11
+
     val activeMatch = match
     if (activeMatch == null) {
         Column(
@@ -113,14 +129,14 @@ fun LiveScoringScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "કોઈ મેચ લાઇવ નથી (No Live Match)",
+                text = "No Live Match",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "લાઇવ સ્કોરિંગ શરૂ કરવા માટે પહેલા ટીમના નામ અને ખેલાડીઓ ઉમેરો.",
+                text = "To start live scoring, first enter team names and add players in match setup.",
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 fontSize = 13.sp,
                 color = CricTextSecondary,
@@ -134,7 +150,7 @@ fun LiveScoringScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Start a Match (મેચ શરૂ કરો)", fontWeight = FontWeight.Bold)
+                Text("Start a Match", fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedButton(onClick = onBack) {
@@ -212,7 +228,7 @@ fun LiveScoringScreen(
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
-                                    text = "🔴 LIVE દર્શક",
+                                    text = "🔴 LIVE VIEWER",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp,
@@ -241,6 +257,49 @@ fun LiveScoringScreen(
                 }
             }
 
+        // Offline Ground Mode & Cloud Sync Banner (Requirement 1)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { viewModel.toggleOfflineMode() }
+                .testTag("offline_sync_banner"),
+            color = if (isOfflineMode) Color(0xFFFEF3C7) else Color(0xFFECFDF5)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        shape = CircleShape,
+                        color = if (isOfflineMode) Color(0xFFD97706) else Color(0xFF10B981),
+                        modifier = Modifier.size(8.dp)
+                    ) {}
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = if (isOfflineMode) "⚡ Offline Ground Mode (${pendingOfflineEvents.size} queued)" else "● Online • Cloud Synced",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = if (isOfflineMode) Color(0xFFB45309) else Color(0xFF047857)
+                    )
+                }
+                if (isOfflineMode) {
+                    Button(
+                        onClick = { viewModel.syncOfflineData() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(26.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                    ) {
+                        Text(if (isSyncing) "Syncing..." else "Sync Now", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    }
+                } else {
+                    Text("Tap for Offline", fontSize = 10.sp, color = CricTextSecondary)
+                }
+            }
+        }
+
         // Mode Switcher Banner: Easily toggle between Live Spectator Mode and Match Scorer Mode
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -268,7 +327,7 @@ fun LiveScoringScreen(
                             .testTag("toggle_spectator_mode_button")
                     ) {
                         Text(
-                            text = "🔴 દર્શક મોડ (Viewer)",
+                            text = "🔴 Viewer Mode",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isSpectatorMode) Color.White else CricTextSecondary
@@ -284,7 +343,7 @@ fun LiveScoringScreen(
                             .testTag("toggle_scorer_mode_button")
                     ) {
                         Text(
-                            text = "✏️ સ્કોરર (Scorer)",
+                            text = "✏️ Scorer",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (!isSpectatorMode) Color.White else CricTextSecondary
@@ -293,7 +352,7 @@ fun LiveScoringScreen(
                 }
 
                 Text(
-                    text = if (isSpectatorMode) "રીડ-ઓન્લી લાઈવ સ્કોર" else "સ્કોરિંગ કીપેડ ઓપન",
+                    text = if (isSpectatorMode) "Read-only Live Score" else "Scoring Keypad Active",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isSpectatorMode) Color(0xFFDC2626) else CricTeal
@@ -521,208 +580,385 @@ fun LiveScoringScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            if (!isSpectatorMode) {
-                // CRICHEROES LIVE SCORING KEYPAD (Only shown to Match Scorer)
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                        .shadow(4.dp, RoundedCornerShape(16.dp))
-                        .testTag("scoring_keypad_card"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            // Scoring, Auto-Commentary & Fantasy 11 Tabs (Requirement 2 & 5)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp),
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                TabRow(
+                    selectedTabIndex = scoringScreenTab,
+                    containerColor = MaterialTheme.colorScheme.surface
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        // Row 1: Primary Runs (0, 1, 2, 3)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            ScoringNumberButton("0", "Dot", Modifier.weight(1f)) { viewModel.recordRuns(0) }
-                            ScoringNumberButton("1", "", Modifier.weight(1f)) { viewModel.recordRuns(1) }
-                            ScoringNumberButton("2", "", Modifier.weight(1f)) { viewModel.recordRuns(2) }
-                            ScoringNumberButton("3", "", Modifier.weight(1f)) { viewModel.recordRuns(3) }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Row 2: Boundary Runs (4, 6) & Quick Extras
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            ScoringSpecialButton("4", "FOUR", Color(0xFF2563EB), Modifier.weight(1f)) { viewModel.recordRuns(4) }
-                            ScoringSpecialButton("6", "SIX", CricGreen, Modifier.weight(1f)) { viewModel.recordRuns(6) }
-                            ScoringExtraButton("WD", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.WIDE, 1) }
-                            ScoringExtraButton("NB", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.NO_BALL, 1) }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Row 3: BYE, LB, and BIG OUT / WICKET BUTTON
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            ScoringExtraButton("BYE", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.BYE, 1) }
-                            ScoringExtraButton("LB", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.LEG_BYE, 1) }
-
-                            // BIG RED OUT BUTTON
-                            Button(
-                                onClick = { viewModel.isWicketModalOpen.value = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = CricSecondary),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier
-                                    .weight(2f)
-                                    .height(48.dp)
-                                    .testTag("wicket_out_button")
-                            ) {
-                                Text("OUT / WICKET", fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                            }
-                        }
-                    }
+                    Tab(
+                        selected = scoringScreenTab == 0,
+                        onClick = { scoringScreenTab = 0 },
+                        text = { Text(if (isSpectatorMode) "Live Hub" else "Keypad", fontSize = 12.sp, fontWeight = if (scoringScreenTab == 0) FontWeight.Bold else FontWeight.Normal) }
+                    )
+                    Tab(
+                        selected = scoringScreenTab == 1,
+                        onClick = { scoringScreenTab = 1 },
+                        text = { Text("Commentary (${commentaryList.size})", fontSize = 12.sp, fontWeight = if (scoringScreenTab == 1) FontWeight.Bold else FontWeight.Normal) }
+                    )
+                    Tab(
+                        selected = scoringScreenTab == 2,
+                        onClick = { scoringScreenTab = 2 },
+                        text = { Text("Fantasy 11 Pts", fontSize = 12.sp, fontWeight = if (scoringScreenTab == 2) FontWeight.Bold else FontWeight.Normal) }
+                    )
                 }
-            } else {
-                // SPECTATOR MODE: No scoring keypad! Live commentary & spectator info only
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
-                        .shadow(3.dp, RoundedCornerShape(16.dp))
-                        .testTag("spectator_view_hub_card"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            when (scoringScreenTab) {
+                0 -> {
+                    // TAB 0: KEYPAD / SCORER OR SPECTATOR VIEW
+                    if (!isSpectatorMode) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp)
+                                .shadow(4.dp, RoundedCornerShape(16.dp))
+                                .testTag("scoring_keypad_card"),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(10.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFFDC2626))
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "લાઈવ દર્શક મોડ (Live Spectator)",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = Color(0xFFDC2626)
-                                )
-                            }
-
-                            Surface(
-                                color = Color(0xFFDCFCE7),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(
-                                    text = "⚡ લાઈવ અપડેટ",
-                                    fontSize = 10.sp,
-                                    color = Color(0xFF16A34A),
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "🔒 સ્કોરિંગ અધિકાર માત્ર અધિકૃત સ્કોરર પાસે છે. સ્કોરર દ્વારા થતાં દરેક બોલનું સ્કોરિંગ અહીં લાઈવ અપડેટ થાય છે.",
-                            fontSize = 12.sp,
-                            color = CricTextSecondary,
-                            lineHeight = 16.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-                        HorizontalDivider(color = Color(0xFFF1F5F9))
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        // Partnership & Projected Score
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text("ચાલુ પાર્ટનરશિપ", fontSize = 11.sp, color = CricTextSecondary)
-                                val pRuns = (currentInning?.striker?.runs ?: 0) + (currentInning?.nonStriker?.runs ?: 0)
-                                val pBalls = (currentInning?.striker?.balls ?: 0) + (currentInning?.nonStriker?.balls ?: 0)
-                                Text(
-                                    text = "$pRuns રન ($pBalls બોલ)",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                )
-                            }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text("પ્રોજેક્ટેડ સ્કોર (${activeMatch.totalOvers} Ov)", fontSize = 11.sp, color = CricTextSecondary)
-                                val projected = ((currentInning?.runRate ?: 0f) * activeMatch.totalOvers).toInt()
-                                Text(
-                                    text = "$projected રન",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp,
-                                    color = CricTeal
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Live Ball Commentary Feed
-                        Text("બોલ-બાય-બોલ લાઈવ કમેન્ટ્રી (Live Ball Feed):", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        val recentBalls = currentInning?.ballHistory?.takeLast(5)?.reversed() ?: emptyList()
-                        if (recentBalls.isEmpty()) {
-                            Text("નવી ઓવરની રાહ જોઈ રહ્યા છીએ...", fontSize = 12.sp, color = CricTextSecondary)
-                        } else {
-                            recentBalls.forEach { ball ->
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                // Row 1: Primary Runs (0, 1, 2, 3)
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    BallBadgeItem(ball = ball)
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Column {
-                                        Text(
-                                            text = "ઓવર ${ball.overNumber}.${ball.ballInOver}: ${ball.bowler.name} થી ${ball.striker.name}",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Text(
-                                            text = when {
-                                                ball.isWicket -> "🚨 વિકેટ! ${ball.dismissedPlayer?.name ?: "બેટ્સમેન"} આઉટ!"
-                                                ball.runsScored == 6 -> "🔥 શાનદાર છગ્ગો! બોલ બાઉન્ડ્રી બહાર!"
-                                                ball.runsScored == 4 -> "🏏 ચોગ્ગો! સુંદર પ્લેસમેન્ટ!"
-                                                ball.extraType != null -> "એક્સ્ટ્રા રન (${ball.displayText})"
-                                                ball.runsScored == 0 -> "ડોટ બોલ, સરસ બોલિંગ"
-                                                else -> "${ball.runsScored} રન, સ્ટ્રાઇક રોટેશન"
-                                            },
-                                            fontSize = 11.sp,
-                                            color = CricTextSecondary
-                                        )
+                                    ScoringNumberButton("0", "Dot", Modifier.weight(1f)) { viewModel.recordRuns(0) }
+                                    ScoringNumberButton("1", "", Modifier.weight(1f)) { viewModel.recordRuns(1) }
+                                    ScoringNumberButton("2", "", Modifier.weight(1f)) { viewModel.recordRuns(2) }
+                                    ScoringNumberButton("3", "", Modifier.weight(1f)) { viewModel.recordRuns(3) }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                // Row 2: Boundary Runs (4, 6) & Quick Extras
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    ScoringSpecialButton("4", "FOUR", Color(0xFF2563EB), Modifier.weight(1f)) { viewModel.recordRuns(4) }
+                                    ScoringSpecialButton("6", "SIX", CricGreen, Modifier.weight(1f)) { viewModel.recordRuns(6) }
+                                    ScoringExtraButton("WD", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.WIDE, 1) }
+                                    ScoringExtraButton("NB", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.NO_BALL, 1) }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                // Row 3: BYE, LB, and BIG OUT / WICKET BUTTON
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    ScoringExtraButton("BYE", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.BYE, 1) }
+                                    ScoringExtraButton("LB", Modifier.weight(1f)) { viewModel.recordExtra(ExtraType.LEG_BYE, 1) }
+
+                                    // BIG RED OUT BUTTON
+                                    Button(
+                                        onClick = { viewModel.isWicketModalOpen.value = true },
+                                        colors = ButtonDefaults.buttonColors(containerColor = CricSecondary),
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier
+                                            .weight(2f)
+                                            .height(48.dp)
+                                            .testTag("wicket_out_button")
+                                    ) {
+                                        Text("OUT / WICKET", fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                                     }
                                 }
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Switch to Scorer button
-                        OutlinedButton(
-                            onClick = { viewModel.setSpectatorMode(false) },
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.fillMaxWidth().testTag("spectator_switch_to_scorer_btn")
+                    } else {
+                        // SPECTATOR MODE
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp)
+                                .shadow(3.dp, RoundedCornerShape(16.dp))
+                                .testTag("spectator_view_hub_card"),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("સ્કોરર મોડમાં બદલો (Switch to Scorer Mode)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(10.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(0xFFDC2626))
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "Live Spectator Mode",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.sp,
+                                            color = Color(0xFFDC2626)
+                                        )
+                                    }
+                                    Surface(
+                                        color = Color(0xFFDCFCE7),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "⚡ LIVE UPDATE",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF16A34A),
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "🔒 Scoring access is restricted to the match scorer. Real-time updates appear automatically.",
+                                    fontSize = 12.sp,
+                                    color = CricTextSecondary,
+                                    lineHeight = 16.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+                                HorizontalDivider(color = Color(0xFFF1F5F9))
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text("Current Partnership", fontSize = 11.sp, color = CricTextSecondary)
+                                        val pRuns = (currentInning?.striker?.runs ?: 0) + (currentInning?.nonStriker?.runs ?: 0)
+                                        val pBalls = (currentInning?.striker?.balls ?: 0) + (currentInning?.nonStriker?.balls ?: 0)
+                                        Text(
+                                            text = "$pRuns runs ($pBalls balls)",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text("Projected Score (${activeMatch.totalOvers} Ov)", fontSize = 11.sp, color = CricTextSecondary)
+                                        val projected = ((currentInning?.runRate ?: 0f) * activeMatch.totalOvers).toInt()
+                                        Text(
+                                            text = "$projected runs",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            color = CricTeal
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                OutlinedButton(
+                                    onClick = { viewModel.setSpectatorMode(false) },
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.fillMaxWidth().testTag("spectator_switch_to_scorer_btn")
+                                ) {
+                                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Switch to Scorer Mode", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                1 -> {
+                    // TAB 1: AUTO-TEXT COMMENTARY (GUJARATI / HINDI / ENGLISH)
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Translate, contentDescription = null, tint = CricTeal, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Auto-Text Commentary", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    listOf("Gujarati", "Hindi", "English").forEach { lang ->
+                                        val isSel = commentaryLanguage.equals(lang, ignoreCase = true)
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = if (isSel) CricTeal else Color(0xFFF1F5F9),
+                                            modifier = Modifier.clickable { viewModel.setCommentaryLanguage(lang) }
+                                        ) {
+                                            Text(
+                                                text = when (lang) {
+                                                    "Gujarati" -> "ગુજરાતી"
+                                                    "Hindi" -> "हिंदी"
+                                                    else -> "EN"
+                                                },
+                                                fontSize = 10.sp,
+                                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isSel) Color.White else Color(0xFF475569),
+                                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Column(
+                                modifier = Modifier
+                                    .heightIn(max = 240.dp)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (commentaryList.isEmpty()) {
+                                    Text("No balls bowled yet in this match.", fontSize = 12.sp, color = CricTextSecondary)
+                                } else {
+                                    commentaryList.forEach { comm ->
+                                        Surface(
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = when {
+                                                comm.isSix -> Color(0xFFECFDF5)
+                                                comm.isBoundary -> Color(0xFFEFF6FF)
+                                                comm.isWicket -> Color(0xFFFEF2F2)
+                                                else -> Color(0xFFF8FAFC)
+                                            },
+                                            border = BorderStroke(
+                                                0.5.dp,
+                                                when {
+                                                    comm.isSix -> Color(0xFFA7F3D0)
+                                                    comm.isBoundary -> Color(0xFFBFDBFE)
+                                                    comm.isWicket -> Color(0xFFFECACA)
+                                                    else -> Color(0xFFE2E8F0)
+                                                }
+                                            ),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Column(modifier = Modifier.padding(8.dp)) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = "Ov ${comm.overText} • ${comm.headline}",
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 11.sp,
+                                                        color = when {
+                                                            comm.isSix -> Color(0xFF047857)
+                                                            comm.isBoundary -> Color(0xFF1D4ED8)
+                                                            comm.isWicket -> Color(0xFFB91C1C)
+                                                            else -> MaterialTheme.colorScheme.onSurface
+                                                        }
+                                                    )
+                                                    Text(comm.timestamp, fontSize = 9.sp, color = CricTextSecondary)
+                                                }
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                val commentText = when (commentaryLanguage.lowercase()) {
+                                                    "gujarati" -> comm.commentaryGujarati
+                                                    "hindi" -> comm.commentaryHindi
+                                                    else -> comm.commentaryEnglish
+                                                }
+                                                Text(
+                                                    text = commentText,
+                                                    fontSize = 12.sp,
+                                                    lineHeight = 16.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                2 -> {
+                    // TAB 2: LIVE FANTASY 11 POINTS
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text("Match Fantasy 11 Points", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Text("Real-time points (100% Free Fan League)", fontSize = 10.sp, color = CricTextSecondary)
+                                }
+                                Button(
+                                    onClick = { viewModel.navigateTo(AppScreen.LocalFantasy) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = CricTeal),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.height(30.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    Text("Create My 11", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Column(
+                                modifier = Modifier
+                                    .heightIn(max = 240.dp)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                val allPlayers = (activeMatch.teamA.players + activeMatch.teamB.players).distinctBy { it.id }
+                                allPlayers.forEach { p ->
+                                    val bScore = currentInning?.batsmenScores?.find { it.player.id == p.id }
+                                    val bwScore = currentInning?.bowlerScores?.find { it.player.id == p.id }
+                                    val runsPts = (bScore?.runs ?: 0) + (bScore?.fours ?: 0) * 1 + (bScore?.sixes ?: 0) * 2 + (if ((bScore?.runs ?: 0) >= 50) 8 else 0)
+                                    val wktPts = (bwScore?.wickets ?: 0) * 25 + (if ((bwScore?.wickets ?: 0) >= 3) 8 else 0) + (bwScore?.maidens ?: 0) * 8
+                                    val totalPts = runsPts + wktPts + (p.catches * 8)
+
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = Color(0xFFF8FAFC),
+                                        border = BorderStroke(0.5.dp, Color(0xFFE2E8F0)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column {
+                                                Text(p.name, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                Text("${p.role} • ${bScore?.runs ?: 0}r, ${bwScore?.wickets ?: 0}w", fontSize = 10.sp, color = CricTextSecondary)
+                                            }
+                                            Text("$totalPts pts", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = CricTeal)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -974,7 +1210,7 @@ fun WicketDismissalDialog(
                 if (selectedType == DismissalType.CAUGHT || selectedType == DismissalType.RUN_OUT || selectedType == DismissalType.STUMPED) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = if (selectedType == DismissalType.CAUGHT) "કેચ કોણે પકડ્યો? (Caught by):" else "ફિલ્ડર પસંદ કરો (Fielder):",
+                        text = if (selectedType == DismissalType.CAUGHT) "Caught by:" else "Select Fielder:",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = CricTeal
@@ -1029,7 +1265,7 @@ fun WicketDismissalDialog(
                     OutlinedTextField(
                         value = fielderName,
                         onValueChange = { fielderName = it },
-                        label = { Text("અથવા ફિલ્ડરનું નામ લખો (Custom Fielder)") },
+                        label = { Text("Or enter custom fielder name") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(10.dp)
